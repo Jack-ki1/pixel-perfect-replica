@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, CheckCircle2, HelpCircle, AlertCircle, ListTodo } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
@@ -122,7 +122,7 @@ function ArtistPage() {
   );
 }
 
-function EvidenceList({ icon, title, items }: { icon: React.ReactNode; title: string; items?: string[] }) {
+function EvidenceList({ icon, title, items }: { icon: ReactNode; title: string; items?: string[] }) {
   if (!items?.length) return null;
   return (
     <div className="mt-4">
