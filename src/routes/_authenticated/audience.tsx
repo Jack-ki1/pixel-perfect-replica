@@ -36,13 +36,13 @@ function AudiencePage() {
           </button>
         ))}
       </div>
-      {artist && mine.length >= 2 ? (
+      {artist && mine[0] && mine.length >= 2 ? (
         <>
           <Panel title={`Core audience shift — ${artist.name}`} sub="Generated from stored aggregate snapshots" action={<Link to="/artists/$id" params={{ id: artist.id }} className="text-xs text-lime hover:underline">Open profile →</Link>}>
-            <p className="text-sm">{morphNarrative(mine[0], mine[mine.length - 1])}</p>
+            <p className="text-sm">{morphNarrative(mine[0], mine[mine.length - 1]!)}</p>
             <p className="mt-2 text-xs text-muted-foreground">Hypothesis, not causal: consider localised content and a live date in the fastest-growing cross-border market. Confidence limited by demo coverage.</p>
           </Panel>
-          <AudienceCompare prior={mine[0]} current={mine[mine.length - 1]} />
+          <AudienceCompare prior={mine[0]} current={mine[mine.length - 1]!} />
         </>
       ) : (
         <Panel><p className="py-8 text-center text-sm text-muted-foreground">Fewer than two snapshots from the same source — comparison unavailable.</p></Panel>
