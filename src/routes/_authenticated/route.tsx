@@ -23,11 +23,7 @@ const ROLE_LABEL: Record<string, string> = { admin: "Admin", head_of_ar: "Head o
 
 function Shell() {
   const navigate = useNavigate();
-  const qc = useQueryClient();
   const path = useRouterState({ select: (s) => s.location.pathname });
-  const { data: me } = useQuery(myRolesQuery);
-
-  }
 
   return (
     <div className="flex min-h-screen">
