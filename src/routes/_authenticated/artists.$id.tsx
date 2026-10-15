@@ -139,7 +139,7 @@ function Notes({ artistId }: { artistId: string }) {
   const add = useMutation({
     mutationFn: async () => {
       const { data: u } = await supabase.auth.getUser();
-      const { error } = await supabase.from("artist_notes").insert({ artist_id: artistId, body, author_id: u.user!.id, author_name: u.user!.email });
+      const { error } = await supabase.from("artist_notes").insert({ artist_id: artistId, body, author_id: u.user!.id, author_name: u.user!.email ?? null });
       if (error) throw error;
     },
     onSuccess: () => { setBody(""); qc.invalidateQueries({ queryKey: ["notes", artistId] }); toast.success("Note saved"); },

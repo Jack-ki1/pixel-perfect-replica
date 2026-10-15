@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_authenticated/artists/")({
   head: () => ({ meta: [{ title: "Artists — Breakout Radar" }, { name: "description", content: "All monitored artists." }] }),
-  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s.q === "string" ? s.q : undefined }),
+  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s["q"] === "string" ? s["q"] : undefined }),
   loader: ({ context }) => context.queryClient.ensureQueryData(artistsQuery),
   component: ArtistsPage,
 });
@@ -36,7 +36,7 @@ function ArtistsPage() {
               </div>
               <div className="mt-2 text-xs text-muted-foreground num">{fmt(a.audience_current)} audience · <span className="text-lime">+{Number(a.growth_30d)}%</span></div>
             </div>
-            <ScoreRing value={(a.scores as Record<string, number>).priority} />
+            <ScoreRing value={(a.scores as Record<string, number>)["priority"]} />
           </Link>
         ))}
         {rows.length === 0 && <p className="col-span-full py-10 text-center text-sm text-muted-foreground">No artists match “{q}”.</p>}

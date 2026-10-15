@@ -18,7 +18,7 @@ const COUNTRIES = ["All", "Kenya", "Uganda", "Tanzania", "Nigeria", "Ghana", "So
 
 function exportCsv(rows: Artist[]) {
   const head = ["canonical_id", "name", "country", "genre", "stage", "growth_30d", "expected_growth_30d", "priority", "integrity", "confidence", "is_demo"];
-  const lines = rows.map((a) => [a.canonical_id, a.name, a.country, a.genre, a.stage, a.growth_30d, a.expected_growth_30d, (a.scores as Record<string, number>).priority, a.integrity, a.evidence_confidence, a.is_demo].join(","));
+  const lines = rows.map((a) => [a.canonical_id, a.name, a.country, a.genre, a.stage, a.growth_30d, a.expected_growth_30d, (a.scores as Record<string, number>)["priority"], a.integrity, a.evidence_confidence, a.is_demo].join(","));
   const blob = new Blob([[head.join(","), ...lines].join("\n")], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
   const el = document.createElement("a");
@@ -36,7 +36,7 @@ function RadarPage() {
     () => artists
       .filter((a) => country === "All" || a.country === country)
       .filter((a) => !cleanOnly || isEligibleClean(a.integrity))
-      .sort((a, b) => ((b.scores as Record<string, number>).priority ?? 0) - ((a.scores as Record<string, number>).priority ?? 0)),
+      .sort((a, b) => ((b.scores as Record<string, number>)["priority"] ?? 0) - ((a.scores as Record<string, number>)["priority"] ?? 0)),
     [artists, country, cleanOnly],
   );
   const review = artists.filter((a) => a.integrity === "suspicious");
@@ -99,7 +99,7 @@ function RadarPage() {
                     <td className="text-right num">{fmt(a.audience_current)}</td>
                     <td className="text-right font-semibold text-lime num">+{Number(a.growth_30d)}%</td>
                     <td className="text-right num">{growthMultiplier(Number(a.growth_30d), Number(a.expected_growth_30d))}×</td>
-                    <td><div className="flex justify-center"><ScoreRing value={(a.scores as Record<string, number>).priority} size={34} /></div></td>
+                    <td><div className="flex justify-center"><ScoreRing value={(a.scores as Record<string, number>)["priority"]} size={34} /></div></td>
                     <td><IntegrityChip value={a.integrity} /></td>
                     <td className="text-right num">{a.evidence_confidence}%</td>
                     <td className="max-w-40 truncate text-xs text-muted-foreground" title={a.next_action ?? ""}>{a.next_action ?? "—"}</td>
