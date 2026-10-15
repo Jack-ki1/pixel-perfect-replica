@@ -71,9 +71,10 @@ export function AudienceCompare({ prior, current }: { prior: Snapshot; current: 
 }
 
 export function morphNarrative(prior: Snapshot, current: Snapshot): string {
-  const rows = compareSegments((prior.segments as Segs).age ?? {}, prior.total, (current.segments as Segs).age ?? {}, current.total);
+  const rows = compareSegments((prior.segments as Segs)["age"] ?? {}, prior.total, (current.segments as Segs)["age"] ?? {}, current.total);
   const gain = [...rows].sort((a, b) => b.ppChange - a.ppChange)[0];
   const loss = [...rows].sort((a, b) => a.ppChange - b.ppChange)[0];
-  const cross = compareSegments((prior.segments as Segs).city ?? {}, prior.total, (current.segments as Segs).city ?? {}, current.total).find((r) => r.segment === "Cross-border");
+  if (!gain || !loss) return "Insufficient segment data.";
+  const cross = compareSegments((prior.segments as Segs)["city"] ?? {}, prior.total, (current.segments as Segs)["city"] ?? {}, current.total).find((r) => r.segment === "Cross-border");
   return `Largest share gain: ${gain.segment} (${gain.ppChange > 0 ? "+" : ""}${gain.ppChange} pp). Largest share loss: ${loss.segment} (${loss.ppChange} pp)${loss.absChange > 0 ? `, though this group still grew by ${loss.absChange.toLocaleString()} people` : ""}. Cross-border share ${cross ? `${cross.priorShare}% → ${cross.currentShare}%` : "n/a"}.`;
 }

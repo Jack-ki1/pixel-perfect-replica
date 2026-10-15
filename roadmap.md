@@ -1,0 +1,11 @@
+# Breakout Radar roadmap
+- [x] Phase 1: sign-in (invite only), roles, shell, Command Centre, Artists, Artist Profile, Audience Morphing, Pipeline, demo seed
+- [ ] Discover (filter builder, saved searches)
+- [ ] UGC Intelligence
+- [ ] Growth Integrity case queue
+- [ ] Artistic Review rubric
+- [ ] Predictions + model registry
+- [ ] Backtesting workbench
+- [ ] Alerts, Reports
+- [ ] Artist Development
+- [ ] Data Sources, Settings, admin role management

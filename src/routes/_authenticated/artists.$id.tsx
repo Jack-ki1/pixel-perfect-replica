@@ -41,7 +41,7 @@ function ArtistPage() {
 
   return (
     <div className="space-y-6">
-      <Link to="/artists" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"><ArrowLeft className="size-3" /> Artists</Link>
+      <Link to="/artists" search={{ q: undefined }} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"><ArrowLeft className="size-3" /> Artists</Link>
       <section className="panel flex flex-col gap-6 p-6 lg:flex-row lg:items-center">
         <Portrait seed={a.portrait_seed} name={a.name} className="size-28 rounded-2xl" />
         <div className="flex-1">
@@ -105,7 +105,7 @@ function ArtistPage() {
           </Panel>
         </TabsContent>
         <TabsContent value="audience" className="mt-4">
-          {mine.length >= 2 ? <AudienceCompare prior={mine[0]} current={mine[mine.length - 1]} /> : <Panel><p className="text-sm text-muted-foreground">Need two snapshots from the same source to compare.</p></Panel>}
+          {mine.length >= 2 && mine[0] && mine[mine.length - 1] ? <AudienceCompare prior={mine[0]} current={mine[mine.length - 1]!} /> : <Panel><p className="text-sm text-muted-foreground">Need two snapshots from the same source to compare.</p></Panel>}
         </TabsContent>
         <TabsContent value="timeline" className="mt-4">
           <Panel title="Events" sub="Releases, UGC, live, campaigns and notable shifts">
@@ -122,7 +122,7 @@ function ArtistPage() {
   );
 }
 
-function EvidenceList({ icon, title, items }: { icon: ReactNode; title: string; items?: string[] }) {
+function EvidenceList({ icon, title, items }: { icon: ReactNode; title: string; items?: string[] | undefined }) {
   if (!items?.length) return null;
   return (
     <div className="mt-4">
@@ -139,7 +139,7 @@ function Notes({ artistId }: { artistId: string }) {
   const add = useMutation({
     mutationFn: async () => {
       const { data: u } = await supabase.auth.getUser();
-      const { error } = await supabase.from("artist_notes").insert({ artist_id: artistId, body, author_id: u.user!.id, author_name: u.user!.email });
+      const { error } = await supabase.from("artist_notes").insert({ artist_id: artistId, body, author_id: u.user!.id, author_name: u.user!.email ?? null });
       if (error) throw error;
     },
     onSuccess: () => { setBody(""); qc.invalidateQueries({ queryKey: ["notes", artistId] }); toast.success("Note saved"); },
