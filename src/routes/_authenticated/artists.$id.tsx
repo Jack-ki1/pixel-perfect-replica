@@ -138,7 +138,7 @@ function Notes({ artistId }: { artistId: string }) {
   const [body, setBody] = useState("");
   const add = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("artist_notes").insert({ artist_id: artistId, body, author_id: null, author_name: "A&R Team" });
+      const { error } = await supabase.from("artist_notes").insert({ artist_id: artistId, body, author_id: "00000000-0000-0000-0000-000000000000", author_name: "A&R Team" });
       if (error) throw error;
     },
     onSuccess: () => { setBody(""); qc.invalidateQueries({ queryKey: ["notes", artistId] }); toast.success("Note saved"); },

@@ -1,9 +1,6 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, Compass, Gauge, Users, Kanban, Search, LogOut, PieChart, Lock } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Bell, Compass, Gauge, Users, Kanban, Search, PieChart, Lock } from "lucide-react";
 import { Logo } from "@/components/br-ui";
-import { myRolesQuery } from "@/lib/artists";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -19,7 +16,6 @@ const NAV = [
 ] as const;
 const NEXT = ["Discover", "UGC Intelligence", "Growth Integrity", "Artistic Review", "Predictions", "Backtesting", "Alerts", "Artist Development", "Reports", "Data Sources", "Settings"];
 
-const ROLE_LABEL: Record<string, string> = { admin: "Admin", head_of_ar: "Head of A&R", scout: "Scout", analyst: "Analyst", artist_dev: "Artist Development" };
 
 function Shell() {
   const navigate = useNavigate();
