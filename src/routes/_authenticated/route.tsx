@@ -8,12 +8,17 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
+  // REVIEW MODE: sign-in gate temporarily disabled so the team can review demo screens.
   beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
+    if (!REVIEW_MODE) {
+      const { data } = await supabase.auth.getUser();
+      if (!data.user) throw redirect({ to: "/auth" });
+    }
   },
   component: Shell,
 });
+
+const REVIEW_MODE = true;
 
 const NAV = [
   { to: "/radar", label: "Command Centre", icon: Gauge },
@@ -62,6 +67,7 @@ function Shell() {
           ))}
         </ul>
         <div className="mt-auto rounded-lg bg-sidebar-accent p-3 text-xs">
+          {REVIEW_MODE && !me?.email && <div className="mb-1 font-semibold text-amber">Review mode · sign-in paused</div>}
           <div className="truncate font-medium">{me?.email}</div>
           <div className="text-muted-foreground">{me?.roles.map((r) => ROLE_LABEL[r] ?? r).join(", ") || "No role assigned"}</div>
           <button onClick={signOut} className="mt-2 flex items-center gap-1.5 text-muted-foreground hover:text-foreground"><LogOut className="size-3" /> Sign out</button>
