@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_authenticated")({
   component: Shell,
 });
 
-export const REVIEW_MODE = true;
+const REVIEW_MODE = true;
 
 const NAV = [
   { to: "/radar", label: "Command Centre", icon: Gauge },
