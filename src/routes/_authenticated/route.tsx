@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, Compass, Gauge, Users, Kanban, Search, LogOut, PieChart, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,10 +8,6 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
-  beforeLoad: async () => {
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) throw redirect({ to: "/auth" });
-  },
   component: Shell,
 });
 
@@ -31,11 +27,6 @@ function Shell() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { data: me } = useQuery(myRolesQuery);
 
-  async function signOut() {
-    await qc.cancelQueries();
-    qc.clear();
-    await supabase.auth.signOut();
-    navigate({ to: "/auth", replace: true });
   }
 
   return (
@@ -62,9 +53,8 @@ function Shell() {
           ))}
         </ul>
         <div className="mt-auto rounded-lg bg-sidebar-accent p-3 text-xs">
-          <div className="truncate font-medium">{me?.email}</div>
-          <div className="text-muted-foreground">{me?.roles.map((r) => ROLE_LABEL[r] ?? r).join(", ") || "No role assigned"}</div>
-          <button onClick={signOut} className="mt-2 flex items-center gap-1.5 text-muted-foreground hover:text-foreground"><LogOut className="size-3" /> Sign out</button>
+          <div className="font-medium">A&R Team</div>
+          <div className="text-muted-foreground">Internal use only</div>
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
