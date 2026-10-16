@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      alerts: {
+        Row: {
+          artist_id: string | null
+          body: string | null
+          created_at: string
+          id: string
+          is_demo: boolean
+          is_read: boolean
+          kind: string
+          title: string
+        }
+        Insert: {
+          artist_id?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_demo?: boolean
+          is_read?: boolean
+          kind: string
+          title: string
+        }
+        Update: {
+          artist_id?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_demo?: boolean
+          is_read?: boolean
+          kind?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alerts_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artist_notes: {
         Row: {
           artist_id: string
@@ -42,6 +83,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "artist_notes_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artistic_reviews: {
+        Row: {
+          artist_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          reviewer: string
+          scores: Json
+          verdict: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reviewer?: string
+          scores?: Json
+          verdict: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          reviewer?: string
+          scores?: Json
+          verdict?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artistic_reviews_artist_id_fkey"
             columns: ["artist_id"]
             isOneToOne: false
             referencedRelation: "artists"
@@ -213,6 +292,88 @@ export type Database = {
         }
         Relationships: []
       }
+      dev_tasks: {
+        Row: {
+          area: string
+          artist_id: string
+          created_at: string
+          done: boolean
+          due: string | null
+          id: string
+          title: string
+        }
+        Insert: {
+          area: string
+          artist_id: string
+          created_at?: string
+          done?: boolean
+          due?: string | null
+          id?: string
+          title: string
+        }
+        Update: {
+          area?: string
+          artist_id?: string
+          created_at?: string
+          done?: boolean
+          due?: string | null
+          id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dev_tasks_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integrity_cases: {
+        Row: {
+          artist_id: string
+          created_at: string
+          id: string
+          is_demo: boolean
+          reason: string
+          resolution: string | null
+          resolved_at: string | null
+          signals: Json
+          status: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          id?: string
+          is_demo?: boolean
+          reason: string
+          resolution?: string | null
+          resolved_at?: string | null
+          signals?: Json
+          status?: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          id?: string
+          is_demo?: boolean
+          reason?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          signals?: Json
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integrity_cases_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -228,6 +389,27 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+        }
+        Relationships: []
+      }
+      saved_searches: {
+        Row: {
+          created_at: string
+          filters: Json
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          filters?: Json
+          id?: string
+          name?: string
         }
         Relationships: []
       }

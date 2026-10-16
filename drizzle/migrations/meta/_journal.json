@@ -15,6 +15,13 @@
       "when": 1792037986305,
       "tag": "0001_review_mode_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792124209647,
+      "tag": "0002_next_phase_modules",
+      "breakpoints": true
     }
   ]
 }
