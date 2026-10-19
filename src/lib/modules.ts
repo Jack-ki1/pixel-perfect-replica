@@ -32,11 +32,9 @@ export function modelScore(a: Artist, weights: Record<string, number>) {
 export function backtest(a: Artist, cut: number) {
   const pts = series(a);
   if (pts.length <= cut || cut < 2) return null;
-  const early = pts.slice(0, cut);
-  const rate = (early[early.length - 1].a / early[0].a) ** (1 / (cut - 1));
-  const steps = pts.length - cut;
-  const predicted = Math.round(early[early.length - 1].a * rate ** steps);
-  const actual = pts[pts.length - 1].a;
+  const first = pts[0]!.a, last = pts[cut - 1]!.a, actual = pts[pts.length - 1]!.a;
+  const rate = (last / first) ** (1 / (cut - 1));
+  const predicted = Math.round(last * rate ** (pts.length - cut));
   return { predicted, actual, errorPct: Math.round(((predicted - actual) / actual) * 100) };
 }
 

@@ -24,7 +24,7 @@ function Review() {
   const qc = useQueryClient();
   const [artistId, setArtistId] = useState(artists[0]?.id ?? "");
   const [scores, setScores] = useState<Record<string, number>>(Object.fromEntries(RUBRIC.map((r) => [r, 3])));
-  const [verdict, setVerdict] = useState(VERDICTS[1]);
+  const [verdict, setVerdict] = useState<string>("Promising");
   const [notes, setNotes] = useState("");
   const avg = Math.round((Object.values(scores).reduce((s, v) => s + v, 0) / RUBRIC.length) * 20);
   const submit = useMutation({

@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/development")({
   component: Development,
 });
 
-const AREAS = ["Music", "Live", "Content", "Brand", "Team"];
+const AREAS: string[] = ["Music", "Live", "Content", "Brand", "Team"];
 const DEV_STAGES = ["live_audition", "development", "negotiation", "signed"];
 
 function Development() {
@@ -23,7 +23,7 @@ function Development() {
   const { data: tasks } = useSuspenseQuery(tableQuery("dev_tasks"));
   const qc = useQueryClient();
   const list = artists.filter((a) => DEV_STAGES.includes(a.pipeline_stage) || tasks.some((t) => t.artist_id === a.id));
-  const [form, setForm] = useState({ artist_id: artists[0]?.id ?? "", area: AREAS[0], title: "", due: "" });
+  const [form, setForm] = useState({ artist_id: artists[0]?.id ?? "", area: "Music", title: "", due: "" });
   const inv = () => qc.invalidateQueries({ queryKey: ["dev_tasks"] });
   const add = useMutation({
     mutationFn: async () => { const { error } = await supabase.from("dev_tasks").insert({ ...form, title: form.title.trim(), due: form.due || null }); if (error) throw error; },
