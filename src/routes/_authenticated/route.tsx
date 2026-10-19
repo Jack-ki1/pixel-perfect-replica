@@ -11,10 +11,20 @@ export const Route = createFileRoute("/_authenticated")({
 const NAV = [
   { to: "/radar", label: "Command Centre", icon: Gauge },
   { to: "/artists", label: "Artists", icon: Users },
+  { to: "/discover", label: "Discover", icon: Compass },
   { to: "/audience", label: "Audience", icon: PieChart },
+  { to: "/ugc", label: "UGC Intelligence", icon: Video },
+  { to: "/integrity", label: "Growth Integrity", icon: ShieldAlert },
+  { to: "/review", label: "Artistic Review", icon: Star },
   { to: "/pipeline", label: "A&R Pipeline", icon: Kanban },
+  { to: "/predictions", label: "Predictions", icon: TrendingUp },
+  { to: "/backtesting", label: "Backtesting", icon: FlaskConical },
+  { to: "/alerts", label: "Alerts", icon: Bell },
+  { to: "/development", label: "Artist Development", icon: Sprout },
+  { to: "/reports", label: "Reports", icon: FileText },
+  { to: "/sources", label: "Data Sources", icon: Database },
+  { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
-const NEXT = ["Discover", "UGC Intelligence", "Growth Integrity", "Artistic Review", "Predictions", "Backtesting", "Alerts", "Artist Development", "Reports", "Data Sources", "Settings"];
 
 
 function Shell() {
