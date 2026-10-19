@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Bell, Compass, Gauge, Users, Kanban, Search, PieChart, Lock } from "lucide-react";
+import { Bell, Compass, Gauge, Users, Kanban, Search, PieChart, Video, ShieldAlert, Star, TrendingUp, FlaskConical, Sprout, FileText, Database, Settings } from "lucide-react";
 import { Logo } from "@/components/br-ui";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +35,7 @@ function Shell() {
     <div className="flex min-h-screen">
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-4 md:flex">
         <Logo className="mb-8 px-2" />
-        <nav className="space-y-1" aria-label="Main">
+        <nav className="space-y-0.5 overflow-y-auto" aria-label="Main">
           {NAV.map((n) => {
             const active = path.startsWith(n.to);
             return (
@@ -46,14 +46,6 @@ function Shell() {
             );
           })}
         </nav>
-        <div className="mt-6 px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Next phase</div>
-        <ul className="mt-2 space-y-0.5 overflow-y-auto">
-          {NEXT.map((l) => (
-            <li key={l} className="flex items-center gap-3 px-3 py-1.5 text-xs text-muted-foreground/60" title="Coming in the next build phase">
-              <Lock className="size-3" /> {l}
-            </li>
-          ))}
-        </ul>
         <div className="mt-auto rounded-lg bg-sidebar-accent p-3 text-xs">
           <div className="font-medium">A&R Team</div>
           <div className="text-muted-foreground">Internal use only</div>
@@ -70,8 +62,8 @@ function Shell() {
             <span className="mx-2 h-4 w-px bg-border" />
             Data as of 14 Sep 2026 · demo fixtures
           </div>
-          <Link to="/pipeline" aria-label="Recent activity" className="relative rounded-lg p-2 hover:bg-accent"><Bell className="size-4" /></Link>
-          <nav className="flex gap-1 md:hidden">
+          <Link to="/alerts" aria-label="Alerts" className="relative rounded-lg p-2 hover:bg-accent"><Bell className="size-4" /></Link>
+          <nav className="flex gap-1 overflow-x-auto md:hidden">
             {NAV.map((n) => <Link key={n.to} to={n.to} aria-label={n.label} className="rounded-lg p-2 hover:bg-accent"><n.icon className="size-4" /></Link>)}
           </nav>
         </header>
