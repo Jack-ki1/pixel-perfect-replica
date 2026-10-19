@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Bell, Compass, Gauge, Users, Kanban, Search, PieChart, Video, ShieldAlert, Star, TrendingUp, FlaskConical, Sprout, FileText, Database, Settings } from "lucide-react";
 import { Logo } from "@/components/br-ui";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -62,6 +63,7 @@ function Shell() {
             <span className="mx-2 h-4 w-px bg-border" />
             Data as of 14 Sep 2026 · demo fixtures
           </div>
+          <ThemeToggle />
           <Link to="/alerts" aria-label="Alerts" className="relative rounded-lg p-2 hover:bg-accent"><Bell className="size-4" /></Link>
           <nav className="flex gap-1 overflow-x-auto md:hidden">
             {NAV.map((n) => <Link key={n.to} to={n.to} aria-label={n.label} className="rounded-lg p-2 hover:bg-accent"><n.icon className="size-4" /></Link>)}

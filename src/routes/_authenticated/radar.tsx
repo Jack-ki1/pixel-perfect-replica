@@ -43,7 +43,7 @@ function RadarPage() {
 
   return (
     <div className="space-y-6">
-      <section className="relative overflow-hidden rounded-2xl border">
+      <section className="dark relative overflow-hidden rounded-2xl border text-foreground">
         <img src={hero} alt="Artist performing on stage" className="absolute inset-0 h-full w-full object-cover object-right" width={1600} height={640} />
         <div className="hero-fade absolute inset-0" />
         <div className="relative max-w-xl p-8">
