@@ -330,6 +330,33 @@ export type Database = {
           },
         ]
       }
+      discovery_runs: {
+        Row: {
+          error: string | null
+          finished_at: string | null
+          id: string
+          kind: string
+          started_at: string
+          stats: Json
+        }
+        Insert: {
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          kind: string
+          started_at?: string
+          stats?: Json
+        }
+        Update: {
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          kind?: string
+          started_at?: string
+          stats?: Json
+        }
+        Relationships: []
+      }
       integrity_cases: {
         Row: {
           artist_id: string
@@ -370,6 +397,192 @@ export type Database = {
             columns: ["artist_id"]
             isOneToOne: false
             referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_analyses: {
+        Row: {
+          artist_id: string
+          created_at: string
+          deezer_bpm: number | null
+          id: string
+          model: string
+          overall: number | null
+          result: Json
+          track_id: number | null
+          track_link: string | null
+          track_title: string | null
+          week_start: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          deezer_bpm?: number | null
+          id?: string
+          model: string
+          overall?: number | null
+          result: Json
+          track_id?: number | null
+          track_link?: string | null
+          track_title?: string | null
+          week_start: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          deezer_bpm?: number | null
+          id?: string
+          model?: string
+          overall?: number | null
+          result?: Json
+          track_id?: number | null
+          track_link?: string | null
+          track_title?: string | null
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_analyses_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "live_artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_artists: {
+        Row: {
+          country: string | null
+          deezer_id: number
+          discovery_score: number | null
+          features: Json
+          first_seen: string
+          id: string
+          last_scanned: string
+          latest_release: string | null
+          link: string | null
+          mb_checked: boolean
+          mbid: string | null
+          name: string
+          nb_album: number
+          nb_fan: number
+          picture: string | null
+          playlist_hits: number
+          region_source: string | null
+          releases_12m: number | null
+          seed_sources: string[]
+          top_rank: number | null
+        }
+        Insert: {
+          country?: string | null
+          deezer_id: number
+          discovery_score?: number | null
+          features?: Json
+          first_seen?: string
+          id?: string
+          last_scanned?: string
+          latest_release?: string | null
+          link?: string | null
+          mb_checked?: boolean
+          mbid?: string | null
+          name: string
+          nb_album?: number
+          nb_fan?: number
+          picture?: string | null
+          playlist_hits?: number
+          region_source?: string | null
+          releases_12m?: number | null
+          seed_sources?: string[]
+          top_rank?: number | null
+        }
+        Update: {
+          country?: string | null
+          deezer_id?: number
+          discovery_score?: number | null
+          features?: Json
+          first_seen?: string
+          id?: string
+          last_scanned?: string
+          latest_release?: string | null
+          link?: string | null
+          mb_checked?: boolean
+          mbid?: string | null
+          name?: string
+          nb_album?: number
+          nb_fan?: number
+          picture?: string | null
+          playlist_hits?: number
+          region_source?: string | null
+          releases_12m?: number | null
+          seed_sources?: string[]
+          top_rank?: number | null
+        }
+        Relationships: []
+      }
+      live_decisions: {
+        Row: {
+          artist_id: string
+          created_at: string
+          decision: string
+          id: string
+          note: string | null
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          decision: string
+          id?: string
+          note?: string | null
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          decision?: string
+          id?: string
+          note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_decisions_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "live_artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_snapshots: {
+        Row: {
+          artist_id: string
+          captured_at: string
+          id: string
+          nb_fan: number
+          playlist_hits: number
+          top_rank: number | null
+        }
+        Insert: {
+          artist_id: string
+          captured_at?: string
+          id?: string
+          nb_fan: number
+          playlist_hits?: number
+          top_rank?: number | null
+        }
+        Update: {
+          artist_id?: string
+          captured_at?: string
+          id?: string
+          nb_fan?: number
+          playlist_hits?: number
+          top_rank?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_snapshots_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "live_artists"
             referencedColumns: ["id"]
           },
         ]
