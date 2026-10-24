@@ -12,22 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as AuthenticatedAlertsRouteImport } from './routes/_authenticated/alerts'
-import { Route as AuthenticatedAudienceRouteImport } from './routes/_authenticated/audience'
-import { Route as AuthenticatedBacktestingRouteImport } from './routes/_authenticated/backtesting'
-import { Route as AuthenticatedDevelopmentRouteImport } from './routes/_authenticated/development'
-import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
-import { Route as AuthenticatedIntegrityRouteImport } from './routes/_authenticated/integrity'
-import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
-import { Route as AuthenticatedPredictionsRouteImport } from './routes/_authenticated/predictions'
-import { Route as AuthenticatedRadarRouteImport } from './routes/_authenticated/radar'
-import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
-import { Route as AuthenticatedReviewRouteImport } from './routes/_authenticated/review'
-import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedSourcesRouteImport } from './routes/_authenticated/sources'
-import { Route as AuthenticatedUgcRouteImport } from './routes/_authenticated/ugc'
-import { Route as AuthenticatedArtistsIndexRouteImport } from './routes/_authenticated/artists.index'
-import { Route as AuthenticatedArtistsIdRouteImport } from './routes/_authenticated/artists.$id'
+import { Route as AuthenticatedAnalyseRouteImport } from './routes/_authenticated/analyse'
+import { Route as AuthenticatedDiscoveryRouteImport } from './routes/_authenticated/discovery'
+import { Route as AuthenticatedRecommendationsRouteImport } from './routes/_authenticated/recommendations'
+import { Route as AuthenticatedArtistIdRouteImport } from './routes/_authenticated/artist.$id'
+import { Route as ApiPublicJobsAnalysisRouteImport } from './routes/api/public/jobs/analysis'
+import { Route as ApiPublicJobsDiscoveryRouteImport } from './routes/api/public/jobs/discovery'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -43,221 +33,110 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAlertsRoute = AuthenticatedAlertsRouteImport.update({
-  id: '/alerts',
-  path: '/alerts',
+const AuthenticatedAnalyseRoute = AuthenticatedAnalyseRouteImport.update({
+  id: '/analyse',
+  path: '/analyse',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedAudienceRoute = AuthenticatedAudienceRouteImport.update({
-  id: '/audience',
-  path: '/audience',
+const AuthenticatedDiscoveryRoute = AuthenticatedDiscoveryRouteImport.update({
+  id: '/discovery',
+  path: '/discovery',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedBacktestingRoute =
-  AuthenticatedBacktestingRouteImport.update({
-    id: '/backtesting',
-    path: '/backtesting',
+const AuthenticatedRecommendationsRoute =
+  AuthenticatedRecommendationsRouteImport.update({
+    id: '/recommendations',
+    path: '/recommendations',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedDevelopmentRoute =
-  AuthenticatedDevelopmentRouteImport.update({
-    id: '/development',
-    path: '/development',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedDiscoverRoute = AuthenticatedDiscoverRouteImport.update({
-  id: '/discover',
-  path: '/discover',
+const AuthenticatedArtistIdRoute = AuthenticatedArtistIdRouteImport.update({
+  id: '/artist/$id',
+  path: '/artist/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedIntegrityRoute = AuthenticatedIntegrityRouteImport.update({
-  id: '/integrity',
-  path: '/integrity',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const ApiPublicJobsAnalysisRoute = ApiPublicJobsAnalysisRouteImport.update({
+  id: '/api/public/jobs/analysis',
+  path: '/api/public/jobs/analysis',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedPipelineRoute = AuthenticatedPipelineRouteImport.update({
-  id: '/pipeline',
-  path: '/pipeline',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedPredictionsRoute =
-  AuthenticatedPredictionsRouteImport.update({
-    id: '/predictions',
-    path: '/predictions',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedRadarRoute = AuthenticatedRadarRouteImport.update({
-  id: '/radar',
-  path: '/radar',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
-  id: '/reports',
-  path: '/reports',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedReviewRoute = AuthenticatedReviewRouteImport.update({
-  id: '/review',
-  path: '/review',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedSourcesRoute = AuthenticatedSourcesRouteImport.update({
-  id: '/sources',
-  path: '/sources',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedUgcRoute = AuthenticatedUgcRouteImport.update({
-  id: '/ugc',
-  path: '/ugc',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedArtistsIndexRoute =
-  AuthenticatedArtistsIndexRouteImport.update({
-    id: '/artists/',
-    path: '/artists/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
-const AuthenticatedArtistsIdRoute = AuthenticatedArtistsIdRouteImport.update({
-  id: '/artists/$id',
-  path: '/artists/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const ApiPublicJobsDiscoveryRoute = ApiPublicJobsDiscoveryRouteImport.update({
+  id: '/api/public/jobs/discovery',
+  path: '/api/public/jobs/discovery',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/alerts': typeof AuthenticatedAlertsRoute
-  '/audience': typeof AuthenticatedAudienceRoute
-  '/backtesting': typeof AuthenticatedBacktestingRoute
-  '/development': typeof AuthenticatedDevelopmentRoute
-  '/discover': typeof AuthenticatedDiscoverRoute
-  '/integrity': typeof AuthenticatedIntegrityRoute
-  '/pipeline': typeof AuthenticatedPipelineRoute
-  '/predictions': typeof AuthenticatedPredictionsRoute
-  '/radar': typeof AuthenticatedRadarRoute
-  '/reports': typeof AuthenticatedReportsRoute
-  '/review': typeof AuthenticatedReviewRoute
-  '/settings': typeof AuthenticatedSettingsRoute
-  '/sources': typeof AuthenticatedSourcesRoute
-  '/ugc': typeof AuthenticatedUgcRoute
-  '/artists/$id': typeof AuthenticatedArtistsIdRoute
-  '/artists/': typeof AuthenticatedArtistsIndexRoute
+  '/analyse': typeof AuthenticatedAnalyseRoute
+  '/discovery': typeof AuthenticatedDiscoveryRoute
+  '/recommendations': typeof AuthenticatedRecommendationsRoute
+  '/artist/$id': typeof AuthenticatedArtistIdRoute
+  '/api/public/jobs/analysis': typeof ApiPublicJobsAnalysisRoute
+  '/api/public/jobs/discovery': typeof ApiPublicJobsDiscoveryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/alerts': typeof AuthenticatedAlertsRoute
-  '/audience': typeof AuthenticatedAudienceRoute
-  '/backtesting': typeof AuthenticatedBacktestingRoute
-  '/development': typeof AuthenticatedDevelopmentRoute
-  '/discover': typeof AuthenticatedDiscoverRoute
-  '/integrity': typeof AuthenticatedIntegrityRoute
-  '/pipeline': typeof AuthenticatedPipelineRoute
-  '/predictions': typeof AuthenticatedPredictionsRoute
-  '/radar': typeof AuthenticatedRadarRoute
-  '/reports': typeof AuthenticatedReportsRoute
-  '/review': typeof AuthenticatedReviewRoute
-  '/settings': typeof AuthenticatedSettingsRoute
-  '/sources': typeof AuthenticatedSourcesRoute
-  '/ugc': typeof AuthenticatedUgcRoute
-  '/artists/$id': typeof AuthenticatedArtistsIdRoute
-  '/artists': typeof AuthenticatedArtistsIndexRoute
+  '/analyse': typeof AuthenticatedAnalyseRoute
+  '/discovery': typeof AuthenticatedDiscoveryRoute
+  '/recommendations': typeof AuthenticatedRecommendationsRoute
+  '/artist/$id': typeof AuthenticatedArtistIdRoute
+  '/api/public/jobs/analysis': typeof ApiPublicJobsAnalysisRoute
+  '/api/public/jobs/discovery': typeof ApiPublicJobsDiscoveryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
-  '/_authenticated/alerts': typeof AuthenticatedAlertsRoute
-  '/_authenticated/audience': typeof AuthenticatedAudienceRoute
-  '/_authenticated/backtesting': typeof AuthenticatedBacktestingRoute
-  '/_authenticated/development': typeof AuthenticatedDevelopmentRoute
-  '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
-  '/_authenticated/integrity': typeof AuthenticatedIntegrityRoute
-  '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
-  '/_authenticated/predictions': typeof AuthenticatedPredictionsRoute
-  '/_authenticated/radar': typeof AuthenticatedRadarRoute
-  '/_authenticated/reports': typeof AuthenticatedReportsRoute
-  '/_authenticated/review': typeof AuthenticatedReviewRoute
-  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/sources': typeof AuthenticatedSourcesRoute
-  '/_authenticated/ugc': typeof AuthenticatedUgcRoute
-  '/_authenticated/artists/$id': typeof AuthenticatedArtistsIdRoute
-  '/_authenticated/artists/': typeof AuthenticatedArtistsIndexRoute
+  '/_authenticated/analyse': typeof AuthenticatedAnalyseRoute
+  '/_authenticated/discovery': typeof AuthenticatedDiscoveryRoute
+  '/_authenticated/recommendations': typeof AuthenticatedRecommendationsRoute
+  '/_authenticated/artist/$id': typeof AuthenticatedArtistIdRoute
+  '/api/public/jobs/analysis': typeof ApiPublicJobsAnalysisRoute
+  '/api/public/jobs/discovery': typeof ApiPublicJobsDiscoveryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
-    | '/alerts'
-    | '/audience'
-    | '/backtesting'
-    | '/development'
-    | '/discover'
-    | '/integrity'
-    | '/pipeline'
-    | '/predictions'
-    | '/radar'
-    | '/reports'
-    | '/review'
-    | '/settings'
-    | '/sources'
-    | '/ugc'
-    | '/artists/$id'
-    | '/artists/'
+    | '/analyse'
+    | '/discovery'
+    | '/recommendations'
+    | '/artist/$id'
+    | '/api/public/jobs/analysis'
+    | '/api/public/jobs/discovery'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/alerts'
-    | '/audience'
-    | '/backtesting'
-    | '/development'
-    | '/discover'
-    | '/integrity'
-    | '/pipeline'
-    | '/predictions'
-    | '/radar'
-    | '/reports'
-    | '/review'
-    | '/settings'
-    | '/sources'
-    | '/ugc'
-    | '/artists/$id'
-    | '/artists'
+    | '/analyse'
+    | '/discovery'
+    | '/recommendations'
+    | '/artist/$id'
+    | '/api/public/jobs/analysis'
+    | '/api/public/jobs/discovery'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
-    | '/_authenticated/alerts'
-    | '/_authenticated/audience'
-    | '/_authenticated/backtesting'
-    | '/_authenticated/development'
-    | '/_authenticated/discover'
-    | '/_authenticated/integrity'
-    | '/_authenticated/pipeline'
-    | '/_authenticated/predictions'
-    | '/_authenticated/radar'
-    | '/_authenticated/reports'
-    | '/_authenticated/review'
-    | '/_authenticated/settings'
-    | '/_authenticated/sources'
-    | '/_authenticated/ugc'
-    | '/_authenticated/artists/$id'
-    | '/_authenticated/artists/'
+    | '/_authenticated/analyse'
+    | '/_authenticated/discovery'
+    | '/_authenticated/recommendations'
+    | '/_authenticated/artist/$id'
+    | '/api/public/jobs/analysis'
+    | '/api/public/jobs/discovery'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicJobsAnalysisRoute: typeof ApiPublicJobsAnalysisRoute
+  ApiPublicJobsDiscoveryRoute: typeof ApiPublicJobsDiscoveryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -283,157 +162,63 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/alerts': {
-      id: '/_authenticated/alerts'
-      path: '/alerts'
-      fullPath: '/alerts'
-      preLoaderRoute: typeof AuthenticatedAlertsRouteImport
+    '/_authenticated/analyse': {
+      id: '/_authenticated/analyse'
+      path: '/analyse'
+      fullPath: '/analyse'
+      preLoaderRoute: typeof AuthenticatedAnalyseRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/audience': {
-      id: '/_authenticated/audience'
-      path: '/audience'
-      fullPath: '/audience'
-      preLoaderRoute: typeof AuthenticatedAudienceRouteImport
+    '/_authenticated/discovery': {
+      id: '/_authenticated/discovery'
+      path: '/discovery'
+      fullPath: '/discovery'
+      preLoaderRoute: typeof AuthenticatedDiscoveryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/backtesting': {
-      id: '/_authenticated/backtesting'
-      path: '/backtesting'
-      fullPath: '/backtesting'
-      preLoaderRoute: typeof AuthenticatedBacktestingRouteImport
+    '/_authenticated/recommendations': {
+      id: '/_authenticated/recommendations'
+      path: '/recommendations'
+      fullPath: '/recommendations'
+      preLoaderRoute: typeof AuthenticatedRecommendationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/development': {
-      id: '/_authenticated/development'
-      path: '/development'
-      fullPath: '/development'
-      preLoaderRoute: typeof AuthenticatedDevelopmentRouteImport
+    '/_authenticated/artist/$id': {
+      id: '/_authenticated/artist/$id'
+      path: '/artist/$id'
+      fullPath: '/artist/$id'
+      preLoaderRoute: typeof AuthenticatedArtistIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/discover': {
-      id: '/_authenticated/discover'
-      path: '/discover'
-      fullPath: '/discover'
-      preLoaderRoute: typeof AuthenticatedDiscoverRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/api/public/jobs/analysis': {
+      id: '/api/public/jobs/analysis'
+      path: '/api/public/jobs/analysis'
+      fullPath: '/api/public/jobs/analysis'
+      preLoaderRoute: typeof ApiPublicJobsAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/integrity': {
-      id: '/_authenticated/integrity'
-      path: '/integrity'
-      fullPath: '/integrity'
-      preLoaderRoute: typeof AuthenticatedIntegrityRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/pipeline': {
-      id: '/_authenticated/pipeline'
-      path: '/pipeline'
-      fullPath: '/pipeline'
-      preLoaderRoute: typeof AuthenticatedPipelineRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/predictions': {
-      id: '/_authenticated/predictions'
-      path: '/predictions'
-      fullPath: '/predictions'
-      preLoaderRoute: typeof AuthenticatedPredictionsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/radar': {
-      id: '/_authenticated/radar'
-      path: '/radar'
-      fullPath: '/radar'
-      preLoaderRoute: typeof AuthenticatedRadarRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/reports': {
-      id: '/_authenticated/reports'
-      path: '/reports'
-      fullPath: '/reports'
-      preLoaderRoute: typeof AuthenticatedReportsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/review': {
-      id: '/_authenticated/review'
-      path: '/review'
-      fullPath: '/review'
-      preLoaderRoute: typeof AuthenticatedReviewRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/settings': {
-      id: '/_authenticated/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/sources': {
-      id: '/_authenticated/sources'
-      path: '/sources'
-      fullPath: '/sources'
-      preLoaderRoute: typeof AuthenticatedSourcesRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/ugc': {
-      id: '/_authenticated/ugc'
-      path: '/ugc'
-      fullPath: '/ugc'
-      preLoaderRoute: typeof AuthenticatedUgcRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/artists/': {
-      id: '/_authenticated/artists/'
-      path: '/artists'
-      fullPath: '/artists/'
-      preLoaderRoute: typeof AuthenticatedArtistsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/artists/$id': {
-      id: '/_authenticated/artists/$id'
-      path: '/artists/$id'
-      fullPath: '/artists/$id'
-      preLoaderRoute: typeof AuthenticatedArtistsIdRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/api/public/jobs/discovery': {
+      id: '/api/public/jobs/discovery'
+      path: '/api/public/jobs/discovery'
+      fullPath: '/api/public/jobs/discovery'
+      preLoaderRoute: typeof ApiPublicJobsDiscoveryRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAlertsRoute: typeof AuthenticatedAlertsRoute
-  AuthenticatedAudienceRoute: typeof AuthenticatedAudienceRoute
-  AuthenticatedBacktestingRoute: typeof AuthenticatedBacktestingRoute
-  AuthenticatedDevelopmentRoute: typeof AuthenticatedDevelopmentRoute
-  AuthenticatedDiscoverRoute: typeof AuthenticatedDiscoverRoute
-  AuthenticatedIntegrityRoute: typeof AuthenticatedIntegrityRoute
-  AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
-  AuthenticatedPredictionsRoute: typeof AuthenticatedPredictionsRoute
-  AuthenticatedRadarRoute: typeof AuthenticatedRadarRoute
-  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
-  AuthenticatedReviewRoute: typeof AuthenticatedReviewRoute
-  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedSourcesRoute: typeof AuthenticatedSourcesRoute
-  AuthenticatedUgcRoute: typeof AuthenticatedUgcRoute
-  AuthenticatedArtistsIdRoute: typeof AuthenticatedArtistsIdRoute
-  AuthenticatedArtistsIndexRoute: typeof AuthenticatedArtistsIndexRoute
+  AuthenticatedAnalyseRoute: typeof AuthenticatedAnalyseRoute
+  AuthenticatedDiscoveryRoute: typeof AuthenticatedDiscoveryRoute
+  AuthenticatedRecommendationsRoute: typeof AuthenticatedRecommendationsRoute
+  AuthenticatedArtistIdRoute: typeof AuthenticatedArtistIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAlertsRoute: AuthenticatedAlertsRoute,
-  AuthenticatedAudienceRoute: AuthenticatedAudienceRoute,
-  AuthenticatedBacktestingRoute: AuthenticatedBacktestingRoute,
-  AuthenticatedDevelopmentRoute: AuthenticatedDevelopmentRoute,
-  AuthenticatedDiscoverRoute: AuthenticatedDiscoverRoute,
-  AuthenticatedIntegrityRoute: AuthenticatedIntegrityRoute,
-  AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
-  AuthenticatedPredictionsRoute: AuthenticatedPredictionsRoute,
-  AuthenticatedRadarRoute: AuthenticatedRadarRoute,
-  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
-  AuthenticatedReviewRoute: AuthenticatedReviewRoute,
-  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedSourcesRoute: AuthenticatedSourcesRoute,
-  AuthenticatedUgcRoute: AuthenticatedUgcRoute,
-  AuthenticatedArtistsIdRoute: AuthenticatedArtistsIdRoute,
-  AuthenticatedArtistsIndexRoute: AuthenticatedArtistsIndexRoute,
+  AuthenticatedAnalyseRoute: AuthenticatedAnalyseRoute,
+  AuthenticatedDiscoveryRoute: AuthenticatedDiscoveryRoute,
+  AuthenticatedRecommendationsRoute: AuthenticatedRecommendationsRoute,
+  AuthenticatedArtistIdRoute: AuthenticatedArtistIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -443,6 +228,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicJobsAnalysisRoute: ApiPublicJobsAnalysisRoute,
+  ApiPublicJobsDiscoveryRoute: ApiPublicJobsDiscoveryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
