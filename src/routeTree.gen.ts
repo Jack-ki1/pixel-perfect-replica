@@ -28,6 +28,8 @@ import { Route as AuthenticatedSourcesRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedUgcRouteImport } from './routes/_authenticated/ugc'
 import { Route as AuthenticatedArtistsIndexRouteImport } from './routes/_authenticated/artists.index'
 import { Route as AuthenticatedArtistsIdRouteImport } from './routes/_authenticated/artists.$id'
+import { Route as ApiPublicJobsAnalysisRouteImport } from './routes/api/public/jobs/analysis'
+import { Route as ApiPublicJobsDiscoveryRouteImport } from './routes/api/public/jobs/discovery'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -127,6 +129,16 @@ const AuthenticatedArtistsIdRoute = AuthenticatedArtistsIdRouteImport.update({
   path: '/artists/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicJobsAnalysisRoute = ApiPublicJobsAnalysisRouteImport.update({
+  id: '/api/public/jobs/analysis',
+  path: '/api/public/jobs/analysis',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicJobsDiscoveryRoute = ApiPublicJobsDiscoveryRouteImport.update({
+  id: '/api/public/jobs/discovery',
+  path: '/api/public/jobs/discovery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -147,6 +159,8 @@ export interface FileRoutesByFullPath {
   '/ugc': typeof AuthenticatedUgcRoute
   '/artists/$id': typeof AuthenticatedArtistsIdRoute
   '/artists/': typeof AuthenticatedArtistsIndexRoute
+  '/api/public/jobs/analysis': typeof ApiPublicJobsAnalysisRoute
+  '/api/public/jobs/discovery': typeof ApiPublicJobsDiscoveryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -167,6 +181,8 @@ export interface FileRoutesByTo {
   '/ugc': typeof AuthenticatedUgcRoute
   '/artists/$id': typeof AuthenticatedArtistsIdRoute
   '/artists': typeof AuthenticatedArtistsIndexRoute
+  '/api/public/jobs/analysis': typeof ApiPublicJobsAnalysisRoute
+  '/api/public/jobs/discovery': typeof ApiPublicJobsDiscoveryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -189,6 +205,8 @@ export interface FileRoutesById {
   '/_authenticated/ugc': typeof AuthenticatedUgcRoute
   '/_authenticated/artists/$id': typeof AuthenticatedArtistsIdRoute
   '/_authenticated/artists/': typeof AuthenticatedArtistsIndexRoute
+  '/api/public/jobs/analysis': typeof ApiPublicJobsAnalysisRoute
+  '/api/public/jobs/discovery': typeof ApiPublicJobsDiscoveryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -211,6 +229,8 @@ export interface FileRouteTypes {
     | '/ugc'
     | '/artists/$id'
     | '/artists/'
+    | '/api/public/jobs/analysis'
+    | '/api/public/jobs/discovery'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -231,6 +251,8 @@ export interface FileRouteTypes {
     | '/ugc'
     | '/artists/$id'
     | '/artists'
+    | '/api/public/jobs/analysis'
+    | '/api/public/jobs/discovery'
   id:
     | '__root__'
     | '/'
@@ -252,12 +274,16 @@ export interface FileRouteTypes {
     | '/_authenticated/ugc'
     | '/_authenticated/artists/$id'
     | '/_authenticated/artists/'
+    | '/api/public/jobs/analysis'
+    | '/api/public/jobs/discovery'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicJobsAnalysisRoute: typeof ApiPublicJobsAnalysisRoute
+  ApiPublicJobsDiscoveryRoute: typeof ApiPublicJobsDiscoveryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -395,6 +421,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedArtistsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/jobs/analysis': {
+      id: '/api/public/jobs/analysis'
+      path: '/api/public/jobs/analysis'
+      fullPath: '/api/public/jobs/analysis'
+      preLoaderRoute: typeof ApiPublicJobsAnalysisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/jobs/discovery': {
+      id: '/api/public/jobs/discovery'
+      path: '/api/public/jobs/discovery'
+      fullPath: '/api/public/jobs/discovery'
+      preLoaderRoute: typeof ApiPublicJobsDiscoveryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -443,6 +483,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicJobsAnalysisRoute: ApiPublicJobsAnalysisRoute,
+  ApiPublicJobsDiscoveryRoute: ApiPublicJobsDiscoveryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
