@@ -19,7 +19,7 @@ const must = <T,>(r: { data: T | null; error: { message: string } | null }) => {
 
 export const liveArtistsQuery = q(["live_artists"], async () =>
   must(await supabase.from("live_artists").select("*").order("discovery_score", { ascending: false, nullsFirst: false }).limit(500)));
-export const liveArtistQuery = (id: string) => q(["live_artist", id], async () => must(await supabase.from("live_artists").select("*").eq("id", id).maybeSingle()));
+export const liveArtistQuery = (id: string) => q(["live_artist", id], async (): Promise<LiveArtist | null> => must(await supabase.from("live_artists").select("*").eq("id", id).maybeSingle()));
 export const snapshotsQuery = (id: string) => q(["live_snapshots", id], async () => must(await supabase.from("live_snapshots").select("*").eq("artist_id", id).order("captured_at")));
 export const analysesQuery = q(["live_analyses"], async () => must(await supabase.from("live_analyses").select("*").order("week_start", { ascending: false }).limit(500)));
 export const decisionsQuery = q(["live_decisions"], async () => must(await supabase.from("live_decisions").select("*").order("created_at", { ascending: false })));

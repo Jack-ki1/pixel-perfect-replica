@@ -54,7 +54,7 @@ export function Kpi({ icon, value, label, tone = "lime" }: { icon: ReactNode; va
   );
 }
 
-export function Bar({ value, max = 10, className }: { value: number; max?: number; className?: string }) {
+export function Bar({ value, max = 10, className }: { value: number; max?: number; className?: string | undefined }) {
   return <div className="h-1.5 flex-1 rounded-full bg-muted"><div className={cn("h-1.5 rounded-full bg-lime", className)} style={{ width: `${Math.min(100, (value / max) * 100)}%` }} /></div>;
 }
 
