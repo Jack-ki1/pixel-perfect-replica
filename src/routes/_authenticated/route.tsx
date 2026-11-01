@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Bell, Compass, Gauge, Users, Kanban, Search, PieChart, Video, ShieldAlert, Star, TrendingUp, FlaskConical, Sprout, FileText, Database, Settings } from "lucide-react";
+import { Compass, Search, Radar, Headphones, Trophy } from "lucide-react";
 import { Logo } from "@/components/br-ui";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -10,21 +10,9 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 const NAV = [
-  { to: "/radar", label: "Command Centre", icon: Gauge },
-  { to: "/artists", label: "Artists", icon: Users },
-  { to: "/discover", label: "Discover", icon: Compass },
-  { to: "/audience", label: "Audience", icon: PieChart },
-  { to: "/ugc", label: "UGC Intelligence", icon: Video },
-  { to: "/integrity", label: "Growth Integrity", icon: ShieldAlert },
-  { to: "/review", label: "Artistic Review", icon: Star },
-  { to: "/pipeline", label: "A&R Pipeline", icon: Kanban },
-  { to: "/predictions", label: "Predictions", icon: TrendingUp },
-  { to: "/backtesting", label: "Backtesting", icon: FlaskConical },
-  { to: "/alerts", label: "Alerts", icon: Bell },
-  { to: "/development", label: "Artist Development", icon: Sprout },
-  { to: "/reports", label: "Reports", icon: FileText },
-  { to: "/sources", label: "Data Sources", icon: Database },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/discovery", label: "Discovery", icon: Radar },
+  { to: "/analyse", label: "Analyse", icon: Headphones },
+  { to: "/recommendations", label: "Recommendations", icon: Trophy },
 ] as const;
 
 
@@ -54,17 +42,16 @@ function Shell() {
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex h-14 items-center gap-4 border-b bg-background/85 px-4 backdrop-blur md:px-6">
-          <form className="relative max-w-md flex-1" onSubmit={(e) => { e.preventDefault(); const q = new FormData(e.currentTarget).get("q") as string; navigate({ to: "/artists", search: { q } }); }}>
+          <form className="relative max-w-md flex-1" onSubmit={(e) => { e.preventDefault(); const q = new FormData(e.currentTarget).get("q") as string; navigate({ to: "/discovery" }); void q; }}>
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <input name="q" aria-label="Search artists" placeholder="Search artists, genres, cities…" className="h-9 w-full rounded-lg border bg-panel pl-9 pr-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring" />
           </form>
           <div className="ml-auto hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
-            <Compass className="size-3.5" /> Africa · 6 markets
+            <Compass className="size-3.5" /> Africa · East Africa first
             <span className="mx-2 h-4 w-px bg-border" />
-            Data as of 14 Sep 2026 · demo fixtures
+            Live data · Deezer + MusicBrainz
           </div>
           <ThemeToggle />
-          <Link to="/alerts" aria-label="Alerts" className="relative rounded-lg p-2 hover:bg-accent"><Bell className="size-4" /></Link>
           <nav className="flex gap-1 overflow-x-auto md:hidden">
             {NAV.map((n) => <Link key={n.to} to={n.to} aria-label={n.label} className="rounded-lg p-2 hover:bg-accent"><n.icon className="size-4" /></Link>)}
           </nav>
