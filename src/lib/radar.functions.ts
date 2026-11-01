@@ -13,7 +13,7 @@ export const analyseNow = createServerFn({ method: "POST" }).handler(async () =>
 });
 
 export const analyseOne = createServerFn({ method: "POST" })
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data }) => {
     const { analyseArtist } = await import("./radar.server");
     try { return { ok: true as const, ...(await analyseArtist(data.id)) }; }
