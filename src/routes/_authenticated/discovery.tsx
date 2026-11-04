@@ -3,9 +3,10 @@ import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-q
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Radar, Users, ListMusic, Activity, RefreshCw, Globe2 } from "lucide-react";
-import { liveArtistsQuery, runsQuery, feat, fmt, ago } from "@/lib/live";
-import { discoverNow } from "@/lib/radar.functions";
+import { Radar, Users, ListMusic, Activity, RefreshCw, Globe2, TrendingUp, Gauge, Disc3, ShieldOff } from "lucide-react";
+import { BarPlot, DonutPlot, ScatterPlot, AreaPlot, histogram, countBy } from "@/components/charts";
+import { liveArtistsQuery, runsQuery, allArtistsQuery, feat, fmt, ago } from "@/lib/live";
+import { discoverNow, reapplyFilters } from "@/lib/radar.functions";
 import { EAST_AFRICA_ISO } from "@/lib/scoring";
 import { Panel, Kpi, ScoreRing, Avatar, Empty } from "@/components/br-ui";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/discovery")({
     { property: "og:title", content: "Discovery — Breakout Radar" },
     { property: "og:description", content: "Autonomous discovery of emerging African artists from live data." },
   ] }),
-  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(liveArtistsQuery), context.queryClient.ensureQueryData(runsQuery)]),
+  loader: ({ context }) => Promise.all([context.queryClient.ensureQueryData(liveArtistsQuery), context.queryClient.ensureQueryData(runsQuery), context.queryClient.ensureQueryData(allArtistsQuery)]),
   component: Discovery,
 });
 
@@ -28,13 +29,20 @@ const REGION = { all: "All Africa", east: "East Africa", unverified: "Country un
 function Discovery() {
   const { data: artists } = useSuspenseQuery(liveArtistsQuery);
   const { data: runs } = useSuspenseQuery(runsQuery);
+  const { data: all } = useSuspenseQuery(allArtistsQuery);
+  const refilter = useServerFn(reapplyFilters);
+  const recheck = useMutation({
+    mutationFn: () => refilter(),
+    onSuccess: (r) => { toast.success(`${r.kept} emerging kept · ${r.excluded} already-established removed`); ["live_artists", "live_artists_all"].forEach((k) => qc.invalidateQueries({ queryKey: [k] })); },
+    onError: (e: Error) => toast.error(e.message),
+  });
   const qc = useQueryClient();
   const discover = useServerFn(discoverNow);
   const [q, setQ] = useState("");
   const [region, setRegion] = useState<keyof typeof REGION>("all");
   const run = useMutation({
     mutationFn: () => discover(),
-    onSuccess: (s) => { toast.success(`Scanned ${s.playlists} playlists · ${s.emerging} emerging artists · ${s.new} new`); ["live_artists", "discovery_runs"].forEach((k) => qc.invalidateQueries({ queryKey: [k] })); },
+    onSuccess: (s) => { toast.success(`Scanned ${s.playlists} playlists · ${s.emerging} emerging artists · ${s.new} new`); ["live_artists", "live_artists_all", "discovery_runs"].forEach((k) => qc.invalidateQueries({ queryKey: [k] })); },
     onError: (e: Error) => toast.error(`Discovery failed: ${e.message}`),
   });
   const rows = useMemo(() => artists.filter((a) =>
@@ -42,6 +50,13 @@ function Discovery() {
     (region === "all" || (region === "east" ? !!a.country && EAST_AFRICA_ISO.has(a.country) || (!a.country && a.seed_sources.some((s) => /bongo|genge|kenya|tanzania|uganda|rwanda|arban|singeli|ethiop|east/.test(s))) : !a.country))), [artists, q, region]);
   const lastRun = runs.find((r) => r.kind.startsWith("discovery"));
   const withGrowth = artists.filter((a) => feat(a).growth30d != null).length;
+  const excluded = all.filter((a) => a.excluded_reason);
+  const scores = artists.map((a) => Number(a.discovery_score ?? 0));
+  const avgScore = scores.length ? Math.round(scores.reduce((x, y) => x + y, 0) / scores.length) : 0;
+  const growths = artists.map((a) => feat(a).growth30d).filter((g): g is number => g != null);
+  const medGrowth = growths.length ? [...growths].sort((a, b) => a - b)[Math.floor(growths.length / 2)]! : null;
+  const recent = artists.filter((a) => a.latest_release && Date.now() - Date.parse(a.latest_release) < 90 * 864e5).length;
+  const scanRuns = runs.filter((r) => r.kind.startsWith("discovery")).slice().reverse().map((r) => { const st = (r.stats ?? {}) as Record<string, number>; return { name: r.started_at.slice(5, 10), Emerging: st.emerging ?? 0, New: st.new ?? 0, Filtered: st.established ?? 0 }; });
 
   return (
     <div className="space-y-6">
@@ -51,9 +66,10 @@ function Discovery() {
           <div className="max-w-2xl">
             <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-lime"><Radar className="size-3.5" /> Autonomous discovery · live data</div>
             <h1 className="text-3xl font-bold">Who is about to break in Africa</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Every day the radar scans African curator playlists, keeps artists with 100–300K fans, checks their country, tracks fan growth and release activity, and ranks them with a breakout index (0–100, a ranking — not a probability).</p>
+            <p className="mt-2 text-sm text-muted-foreground">Every day the radar scans African curator playlists, drops anyone already established (big fan base, large catalogue, hit-level tracks, a Wikipedia article or on your exclusion list), checks their country, tracks fan growth and release activity, and ranks them with a breakout index (0–100, a ranking — not a probability).</p>
           </div>
           <div className="text-right text-xs text-muted-foreground">
+            <Button variant="outline" className="mr-2" onClick={() => recheck.mutate()} disabled={recheck.isPending}><ShieldOff className="size-4" />{recheck.isPending ? "Checking…" : "Remove established artists"}</Button>
             <Button onClick={() => run.mutate()} disabled={run.isPending}><RefreshCw className={cn("size-4", run.isPending && "animate-spin")} />{run.isPending ? "Scanning… (up to a minute)" : "Run discovery now"}</Button>
             <div className="mt-2">{lastRun ? <>Last scan {ago(lastRun.started_at)}{lastRun.error ? " · had an error" : ""}</> : "No scans yet"} · runs daily automatically</div>
           </div>
@@ -65,7 +81,21 @@ function Discovery() {
         <Kpi icon={<Globe2 className="size-4" />} value={artists.filter((a) => a.country && EAST_AFRICA_ISO.has(a.country)).length} label="Confirmed East African" tone="cyan" />
         <Kpi icon={<Activity className="size-4" />} value={withGrowth} label="With measured fan growth" tone="violet" />
         <Kpi icon={<ListMusic className="size-4" />} value={new Set(artists.flatMap((a) => a.seed_sources)).size} label="Scenes scanned" tone="amber" />
+        <Kpi icon={<Gauge className="size-4" />} value={avgScore} label="Average breakout index" />
+        <Kpi icon={<TrendingUp className="size-4" />} value={medGrowth == null ? "pending" : `${medGrowth}%`} label="Median 30-day fan growth" tone="cyan" />
+        <Kpi icon={<Disc3 className="size-4" />} value={recent} label="Released in last 90 days" tone="violet" />
+        <Kpi icon={<ShieldOff className="size-4" />} value={excluded.length} label="Already-popular artists filtered out" tone="amber" />
       </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <BarPlot title="Breakout index distribution" sub="How many artists fall in each score band" data={histogram(scores, [0, 20, 30, 40, 50, 60, 70, 101], (lo, hi) => `${lo}-${hi === 101 ? 100 : hi}`)} />
+        <DonutPlot title="Country mix" sub="Confirmed via MusicBrainz" data={countBy(artists, (a) => a.country ?? "Unverified", 6)} />
+        <BarPlot title="Fan base size" sub="Smaller = earlier stage" color={1} data={histogram(artists.map((a) => a.nb_fan), [0, 500, 1000, 2500, 5000, 10000, 1e9], (lo, hi) => hi > 1e8 ? `${fmt(lo)}+` : `<${fmt(hi)}`)} />
+        <ScatterPlot title="Fans vs breakout index" sub="Top-left = small but rising fast" x="Fans" y="Index" data={artists.map((a) => ({ name: a.name, x: a.nb_fan, y: Number(a.discovery_score ?? 0) }))} />
+        <BarPlot title="Strongest scenes" sub="Artists found per scene" color={2} horizontal data={countBy(artists.flatMap((a) => a.seed_sources.map((s) => ({ s }))), (r) => r.s, 8)} />
+        <BarPlot title="Why artists were filtered out" sub="Already established, so excluded" color={3} horizontal data={countBy(excluded, (a) => a.excluded_reason?.replace(/\(.*\)/, "").trim(), 6)} />
+      </div>
+      <AreaPlot title="Scan history" sub="Emerging artists kept, new arrivals and established artists filtered per scan" data={scanRuns} keys={["Emerging", "New", "Filtered"]} />
 
       <Panel title="Breakout ranking" sub="Fan growth appears after the radar has seen an artist on two separate days."
         action={<div className="flex flex-wrap gap-2">

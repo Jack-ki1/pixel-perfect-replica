@@ -38,13 +38,15 @@ export type DiscoveryFeatures = {
  * release activity 15%, headroom (smaller = more upside) 10%.
  * Missing momentum is re-weighted away and lowers confidence.
  */
-export function discoveryIndex(f: DiscoveryFeatures) {
+export type DiscoveryWeights = { traction: number; momentum: number; breadth: number; releases: number; headroom: number };
+export function discoveryIndex(f: DiscoveryFeatures, dw: DiscoveryWeights = { traction: 30, momentum: 25, breadth: 20, releases: 15, headroom: 10 }) {
+  const tot = dw.traction + dw.momentum + dw.breadth + dw.releases + dw.headroom || 1;
   const parts: { w: number; v: number | null }[] = [
-    { w: 0.3, v: f.topRank == null ? null : clamp(f.topRank / 600_000) },
-    { w: 0.25, v: f.growth30d == null ? null : clamp(f.growth30d / 60) },
-    { w: 0.2, v: clamp(Math.log2(1 + f.playlistHits) / 3) },
-    { w: 0.15, v: f.daysSinceRelease == null ? null : clamp(1 - f.daysSinceRelease / 365) * 0.6 + clamp((f.releases12m ?? 0) / 4) * 0.4 },
-    { w: 0.1, v: clamp(1 - Math.log10(Math.max(f.fans, 1)) / Math.log10(EMERGING_MAX_FANS)) },
+    { w: dw.traction / tot, v: f.topRank == null ? null : clamp(f.topRank / 600_000) },
+    { w: dw.momentum / tot, v: f.growth30d == null ? null : clamp(f.growth30d / 60) },
+    { w: dw.breadth / tot, v: clamp(Math.log2(1 + f.playlistHits) / 3) },
+    { w: dw.releases / tot, v: f.daysSinceRelease == null ? null : clamp(1 - f.daysSinceRelease / 365) * 0.6 + clamp((f.releases12m ?? 0) / 4) * 0.4 },
+    { w: dw.headroom / tot, v: clamp(1 - Math.log10(Math.max(f.fans, 1)) / Math.log10(EMERGING_MAX_FANS)) },
   ];
   const known = parts.filter((p) => p.v != null);
   const w = known.reduce((s, p) => s + p.w, 0);
@@ -57,8 +59,7 @@ export const ARTISTIC_KEYS = ["songwriting", "vocals", "melody", "production", "
 export type ArtisticKey = (typeof ARTISTIC_KEYS)[number];
 
 /** Artistic overall 0–100 from 0–10 sub-scores; songwriting and vocals count double. */
-export function artisticOverall(s: Partial<Record<ArtisticKey, number>>): number | null {
-  const w: Record<ArtisticKey, number> = { songwriting: 2, vocals: 2, melody: 1.5, production: 1, originality: 1.5, commercial: 1 };
+export function artisticOverall(s: Partial<Record<ArtisticKey, number>>, w: Record<ArtisticKey, number> = { songwriting: 2, vocals: 2, melody: 1.5, production: 1, originality: 1.5, commercial: 1 }): number | null {
   let t = 0, ws = 0;
   for (const k of ARTISTIC_KEYS) { const v = s[k]; if (typeof v === "number") { t += clamp(v / 10) * w[k]; ws += w[k]; } }
   return ws ? Math.round((t / ws) * 100) : null;
@@ -66,10 +67,12 @@ export function artisticOverall(s: Partial<Record<ArtisticKey, number>>): number
 
 export type Tier = "sign" | "meet" | "watch" | "hold";
 /** Recommendation: artistic quality 60%, discovery 40%; artistic quality must clear a floor. */
-export function recommend(discovery: number, artistic: number | null): { score: number; tier: Tier } {
-  if (artistic == null) return { score: Math.round(discovery * 0.4), tier: "hold" };
-  const score = Math.round(artistic * 0.6 + discovery * 0.4);
-  const tier: Tier = artistic >= 75 && score >= 70 ? "sign" : artistic >= 65 && score >= 58 ? "meet" : score >= 45 ? "watch" : "hold";
+export type TierRules = { signArtistic: number; signScore: number; meetArtistic: number; meetScore: number; watchScore: number };
+export function recommend(discovery: number, artistic: number | null, share = 60, t: TierRules = { signArtistic: 75, signScore: 70, meetArtistic: 65, meetScore: 58, watchScore: 45 }): { score: number; tier: Tier } {
+  const a = share / 100;
+  if (artistic == null) return { score: Math.round(discovery * (1 - a)), tier: "hold" };
+  const score = Math.round(artistic * a + discovery * (1 - a));
+  const tier: Tier = artistic >= t.signArtistic && score >= t.signScore ? "sign" : artistic >= t.meetArtistic && score >= t.meetScore ? "meet" : score >= t.watchScore ? "watch" : "hold";
   return { score, tier };
 }
 

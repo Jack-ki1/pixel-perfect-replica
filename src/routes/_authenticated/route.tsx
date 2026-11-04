@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Compass, Search, Radar, Headphones, Trophy } from "lucide-react";
+import { Compass, Search, Radar, Headphones, Trophy, SlidersHorizontal } from "lucide-react";
 import { Logo } from "@/components/br-ui";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ const NAV = [
   { to: "/discovery", label: "Discovery", icon: Radar },
   { to: "/analyse", label: "Analyse", icon: Headphones },
   { to: "/recommendations", label: "Recommendations", icon: Trophy },
+  { to: "/settings", label: "Settings", icon: SlidersHorizontal },
 ] as const;
 
 

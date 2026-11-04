@@ -3,8 +3,9 @@ import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-q
 import { useState } from "react";
 import { toast } from "sonner";
 import { Trophy, Download } from "lucide-react";
+import { BarPlot, DonutPlot, ScatterPlot, histogram } from "@/components/charts";
 import { supabase } from "@/integrations/supabase/client";
-import { liveArtistsQuery, analysesQuery, decisionsQuery, latestByArtist, feat, fmt, type AnalysisJson } from "@/lib/live";
+import { liveArtistsQuery, analysesQuery, decisionsQuery, settingsQuery, latestByArtist, feat, fmt, type AnalysisJson } from "@/lib/live";
 import { recommend, type Tier } from "@/lib/scoring";
 import { Panel, Avatar, ScoreRing, Empty } from "@/components/br-ui";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/_authenticated/recommendations")({
     { property: "og:title", content: "Recommendations — Breakout Radar" },
     { property: "og:description", content: "Which emerging artists to pursue, and why." },
   ] }),
-  loader: ({ context }) => Promise.all([liveArtistsQuery, analysesQuery, decisionsQuery].map((q) => context.queryClient.ensureQueryData(q as typeof liveArtistsQuery))),
+  loader: ({ context }) => Promise.all([liveArtistsQuery, analysesQuery, decisionsQuery, settingsQuery].map((q) => context.queryClient.ensureQueryData(q as typeof liveArtistsQuery))),
   component: Recs,
 });
 
@@ -34,12 +35,13 @@ function Recs() {
   const { data: artists } = useSuspenseQuery(liveArtistsQuery);
   const { data: analyses } = useSuspenseQuery(analysesQuery);
   const { data: decisions } = useSuspenseQuery(decisionsQuery);
+  const { data: cfg } = useSuspenseQuery(settingsQuery);
   const qc = useQueryClient();
   const [note, setNote] = useState<Record<string, string>>({});
   const latest = latestByArtist(analyses);
   const lastDecision = new Map<string, (typeof decisions)[number]>();
   decisions.forEach((d) => { if (!lastDecision.has(d.artist_id)) lastDecision.set(d.artist_id, d); });
-  const rows = artists.map((a) => { const an = latest.get(a.id); const r = recommend(Number(a.discovery_score ?? 0), an ? Number(an.overall) : null); return { a, an, ...r }; })
+  const rows = artists.map((a) => { const an = latest.get(a.id); const r = recommend(Number(a.discovery_score ?? 0), an ? Number(an.overall) : null, cfg.artisticShare, cfg.tiers); return { a, an, ...r }; })
     .filter((x) => x.an).sort((x, y) => y.score - x.score);
   const decide = useMutation({
     mutationFn: async (v: { artist_id: string; decision: keyof typeof DEC }) => { const { error } = await supabase.from("live_decisions").insert({ ...v, note: note[v.artist_id] || null }); if (error) throw error; },
@@ -60,13 +62,21 @@ function Recs() {
         <div className="max-w-2xl">
           <div className="mb-2 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-cyan"><Trophy className="size-3.5" /> Recommendations</div>
           <h1 className="text-3xl font-bold">Who we should pick</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Combines artistic quality (60%) with discovery momentum (40%). "Pursue signing" needs an artistic score of at least 75. Signing remains your team's decision.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Combines artistic quality ({cfg.artisticShare}%) with discovery momentum ({100 - cfg.artisticShare}%). "Pursue signing" needs an artistic score of at least {cfg.tiers.signArtistic}. Tune this in Settings. Signing remains your team's decision.</p>
         </div>
         <Button variant="outline" onClick={csv} disabled={!rows.length}><Download className="size-4" />Export CSV</Button>
       </section>
       <div className="grid gap-3 sm:grid-cols-4">{(Object.keys(TIER) as Tier[]).slice(0, 3).map((t) => (
         <div key={t} className={cn("rounded-xl border p-4", TIER[t].cls)}><div className="font-display text-2xl font-bold num">{rows.filter((r) => r.tier === t).length}</div><div className="text-xs font-semibold">{TIER[t].label}</div><div className="text-[11px] opacity-80">{TIER[t].desc}</div></div>))}
         <div className="rounded-xl border p-4"><div className="font-display text-2xl font-bold num">{artists.length - rows.length}</div><div className="text-xs font-semibold">Awaiting review</div><div className="text-[11px] text-muted-foreground">Discovered, not yet listened to</div></div>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <DonutPlot title="Recommendation mix" data={(Object.keys(TIER) as Tier[]).map((t) => ({ name: TIER[t].label, value: rows.filter((r) => r.tier === t).length }))} />
+        <ScatterPlot title="Artistic vs momentum" sub="Top-right = sign candidates" x="Discovery" y="Artistic" data={rows.map((r) => ({ name: r.a.name, x: Number(r.a.discovery_score ?? 0), y: Number(r.an!.overall) }))} />
+        <BarPlot title="Overall score distribution" color={1} data={histogram(rows.map((r) => r.score), [0, 40, 50, 60, 70, 80, 101], (lo, hi) => `${lo}-${hi === 101 ? 100 : hi}`)} />
+        <BarPlot title="Team decisions" color={2} data={(Object.keys(DEC) as (keyof typeof DEC)[]).map((k) => ({ name: DEC[k], value: [...lastDecision.values()].filter((d) => d.decision === k).length }))} />
+        <BarPlot title="Recommended by country" color={3} horizontal data={Object.entries(rows.filter((r) => r.tier === "sign" || r.tier === "meet").reduce<Record<string, number>>((m, r) => { const c = r.a.country ?? "Unverified"; m[c] = (m[c] ?? 0) + 1; return m; }, {})).map(([name, value]) => ({ name, value }))} />
+        <BarPlot title="Fan base of picks" sub="Sign + meet tiers" data={histogram(rows.filter((r) => r.tier === "sign" || r.tier === "meet").map((r) => r.a.nb_fan), [0, 1000, 5000, 10000, 1e9], (lo, hi) => hi > 1e8 ? `${fmt(lo)}+` : `<${fmt(hi)}`)} />
       </div>
       {rows.length === 0 ? <Empty>Recommendations appear once artists have been reviewed in <Link to="/analyse" className="text-lime underline">Analyse</Link>.</Empty> : (
         <div className="space-y-3">{rows.map(({ a, an, score, tier }, i) => { const j = an!.result as AnalysisJson; const d = lastDecision.get(a.id); return (

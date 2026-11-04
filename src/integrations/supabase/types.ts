@@ -456,6 +456,7 @@ export type Database = {
           country: string | null
           deezer_id: number
           discovery_score: number | null
+          excluded_reason: string | null
           features: Json
           first_seen: string
           id: string
@@ -473,11 +474,14 @@ export type Database = {
           releases_12m: number | null
           seed_sources: string[]
           top_rank: number | null
+          wiki_checked: boolean
+          wiki_famous: boolean
         }
         Insert: {
           country?: string | null
           deezer_id: number
           discovery_score?: number | null
+          excluded_reason?: string | null
           features?: Json
           first_seen?: string
           id?: string
@@ -495,11 +499,14 @@ export type Database = {
           releases_12m?: number | null
           seed_sources?: string[]
           top_rank?: number | null
+          wiki_checked?: boolean
+          wiki_famous?: boolean
         }
         Update: {
           country?: string | null
           deezer_id?: number
           discovery_score?: number | null
+          excluded_reason?: string | null
           features?: Json
           first_seen?: string
           id?: string
@@ -517,6 +524,8 @@ export type Database = {
           releases_12m?: number | null
           seed_sources?: string[]
           top_rank?: number | null
+          wiki_checked?: boolean
+          wiki_famous?: boolean
         }
         Relationships: []
       }
@@ -602,6 +611,24 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+        }
+        Relationships: []
+      }
+      radar_settings: {
+        Row: {
+          config: Json
+          id: number
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          id?: number
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          id?: number
+          updated_at?: string
         }
         Relationships: []
       }

@@ -29,6 +29,13 @@
       "when": 1792643614698,
       "tag": "0003_live_radar",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793785048777,
+      "tag": "0004_radar_settings_fame_filter",
+      "breakpoints": true
     }
   ]
 }
