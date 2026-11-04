@@ -9,7 +9,7 @@ export const discoverNow = createServerFn({ method: "POST" }).handler(async () =
 
 export const analyseNow = createServerFn({ method: "POST" }).handler(async () => {
   const { runWeeklyAnalysis } = await import("./radar.server");
-  return runWeeklyAnalysis(3);
+  return runWeeklyAnalysis();
 });
 
 export const analyseOne = createServerFn({ method: "POST" })
@@ -19,3 +19,18 @@ export const analyseOne = createServerFn({ method: "POST" })
     try { return { ok: true as const, ...(await analyseArtist(data.id)) }; }
     catch (e) { return { ok: false as const, error: (e as Error).message }; }
   });
+
+export const getSettings = createServerFn({ method: "GET" }).handler(async () => {
+  const { loadSettings } = await import("./radar.server");
+  return loadSettings();
+});
+export const updateSettings = createServerFn({ method: "POST" })
+  .validator((d: unknown) => d)
+  .handler(async ({ data }) => {
+    const { saveSettings } = await import("./radar.server");
+    return saveSettings(data);
+  });
+export const reapplyFilters = createServerFn({ method: "POST" }).handler(async () => {
+  const { applyFilters } = await import("./radar.server");
+  return applyFilters();
+});

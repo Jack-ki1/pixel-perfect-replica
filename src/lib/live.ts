@@ -18,7 +18,7 @@ const q = <T,>(key: unknown[], fn: () => Promise<T>) => queryOptions({ queryKey:
 const must = <T,>(r: { data: T | null; error: { message: string } | null }) => { if (r.error) throw new Error(r.error.message); return r.data as T; };
 
 export const liveArtistsQuery = q(["live_artists"], async () =>
-  must(await supabase.from("live_artists").select("*").order("discovery_score", { ascending: false, nullsFirst: false }).limit(500)));
+  must(await supabase.from("live_artists").select("*").is("excluded_reason", null).order("discovery_score", { ascending: false, nullsFirst: false }).limit(500)));
 export const liveArtistQuery = (id: string) => q(["live_artist", id], async (): Promise<LiveArtist | null> => must(await supabase.from("live_artists").select("*").eq("id", id).maybeSingle()));
 export const snapshotsQuery = (id: string) => q(["live_snapshots", id], async () => must(await supabase.from("live_snapshots").select("*").eq("artist_id", id).order("captured_at")));
 export const analysesQuery = q(["live_analyses"], async () => must(await supabase.from("live_analyses").select("*").order("week_start", { ascending: false }).limit(500)));
@@ -35,3 +35,10 @@ export function latestByArtist(rows: LiveAnalysis[]) {
   for (const r of rows) if (!m.has(r.artist_id)) m.set(r.artist_id, r);
   return m;
 }
+export const allArtistsQuery = q(["live_artists_all"], async () =>
+  must(await supabase.from("live_artists").select("id,name,excluded_reason,nb_fan,country").limit(1000)));
+export const settingsQuery = q(["radar_settings"], async () => {
+  const { mergeSettings } = await import("@/lib/settings");
+  const r = await supabase.from("radar_settings").select("config").eq("id", 1).maybeSingle();
+  return mergeSettings(must(r)?.config);
+});

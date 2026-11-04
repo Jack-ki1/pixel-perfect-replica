@@ -3,18 +3,49 @@ import { streamText } from "ai";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { createLovableAiGatewayProvider } from "@/lib/ai/gateway-helpers";
-import { AFRICAN_ISO, artisticOverall, discoveryIndex, fanGrowth30d, isEmerging, weekStart } from "@/lib/scoring";
+import { AFRICAN_ISO, artisticOverall, discoveryIndex, fanGrowth30d, weekStart } from "@/lib/scoring";
+import { mergeSettings, establishedReason, SettingsSchema, type Settings } from "@/lib/settings";
 
 const DZ = "https://api.deezer.com";
 const UA = "BreakoutRadar/1.0 (internal A&R research)";
-export const AUDIO_MODEL = "google/gemini-3.8-flash";
 
-/** Seed searches for African, East-Africa-first playlists. Rotated across runs. */
-export const SEEDS = [
-  "bongo flava", "gengetone", "kenya new music", "tanzania hits", "uganda music", "rwanda music",
-  "arbantone", "kenyan drill", "ethiopian music", "east african hits", "amapiano new", "afrobeats new",
-  "naija new music", "ghana music", "zambia music", "singeli", "kenya gospel", "african rnb",
-];
+export async function loadSettings(): Promise<Settings> {
+  const { data } = await supabaseAdmin.from("radar_settings").select("config").eq("id", 1).maybeSingle();
+  return mergeSettings(data?.config);
+}
+export async function saveSettings(raw: unknown) {
+  const s = SettingsSchema.parse(raw);
+  const { error } = await supabaseAdmin.from("radar_settings").upsert({ id: 1, config: s, updated_at: new Date().toISOString() });
+  if (error) throw new Error(error.message);
+  return s;
+}
+
+/** True when English Wikipedia has an article describing this name as a musician — a strong "already established" signal. */
+async function onWikipedia(name: string): Promise<boolean> {
+  const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(name.replace(/ /g, "_"))}`, { headers: { "User-Agent": UA } });
+  if (!r.ok) return false;
+  const j = (await r.json()) as { type?: string; description?: string; extract?: string };
+  if (j.type !== "standard") return false;
+  return /singer|musician|rapper|songwriter|artist|band|record producer|dj|vocalist/i.test(`${j.description ?? ""} ${(j.extract ?? "").slice(0, 300)}`);
+}
+
+/** Re-check every tracked artist against the current "not already popular" rules. */
+export async function applyFilters() {
+  const s = await loadSettings();
+  const db = supabaseAdmin;
+  const { data: artists } = await db.from("live_artists").select("id,name,nb_fan,nb_album,top_rank,wiki_checked,wiki_famous");
+  let excluded = 0, kept = 0;
+  await pool(artists ?? [], async (a) => {
+    let famous = a.wiki_famous, checked = a.wiki_checked;
+    if (s.sources.wikipedia && !checked) { famous = await onWikipedia(a.name).catch(() => false); checked = true; }
+    const reason = establishedReason({ ...a, wiki_famous: famous }, s);
+    reason ? excluded++ : kept++;
+    await db.from("live_artists").update({ wiki_checked: checked, wiki_famous: famous, excluded_reason: reason }).eq("id", a.id);
+  });
+  await rescoreAll();
+  return { excluded, kept };
+}
+
 
 async function dz<T>(path: string): Promise<T> {
   const r = await fetch(`${DZ}${path}`);
@@ -38,17 +69,20 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 type DzTrack = { id: number; title: string; rank: number; link: string; preview: string; artist: { id: number; name: string } };
 type DzArtist = { id: number; name: string; link: string; picture_medium: string; nb_fan: number; nb_album: number };
 
-export async function runDiscovery(kind: "manual" | "scheduled", seedsPerRun = 3) {
+export async function runDiscovery(kind: "manual" | "scheduled") {
   const db = supabaseAdmin;
+  const cfg = await loadSettings();
+  if (!cfg.sources.deezer) throw new Error("Deezer source is switched off in Settings");
+  const seedsPerRun = Math.min(cfg.seedsPerRun, cfg.seeds.length), SEEDS = cfg.seeds;
   const { data: run } = await db.from("discovery_runs").insert({ kind: `discovery:${kind}` }).select("id").single();
   const { count } = await db.from("discovery_runs").select("id", { count: "exact", head: true }).like("kind", "discovery:%");
   const offset = ((count ?? 1) - 1) * seedsPerRun;
   const seeds = Array.from({ length: seedsPerRun }, (_, k) => SEEDS[(offset + k) % SEEDS.length]!);
-  const stats = { seeds, playlists: 0, tracks: 0, candidates: 0, emerging: 0, new: 0, outsideAfrica: 0 };
+  const stats = { seeds, playlists: 0, tracks: 0, candidates: 0, emerging: 0, new: 0, outsideAfrica: 0, established: 0 };
   try {
     // 1. Find curator playlists for each seed.
-    const lists = (await pool(seeds, (q) => dz<{ data: { id: number; nb_tracks: number }[] }>(`/search/playlist?q=${encodeURIComponent(q)}&limit=3`)))
-      .flatMap((r, k) => (r?.data ?? []).filter((p) => p.nb_tracks >= 15).slice(0, 2).map((p) => ({ id: p.id, seed: seeds[k]! })));
+    const lists = (await pool(seeds, (q) => dz<{ data: { id: number; nb_tracks: number }[] }>(`/search/playlist?q=${encodeURIComponent(q)}&limit=${cfg.playlistsPerSeed + 2}`)))
+      .flatMap((r, k) => (r?.data ?? []).filter((p) => p.nb_tracks >= 15).slice(0, cfg.playlistsPerSeed).map((p) => ({ id: p.id, seed: seeds[k]! })));
     stats.playlists = lists.length;
     // 2. Gather tracks → artists, counting playlist appearances and best track rank.
     const byArtist = new Map<number, { name: string; hits: number; rank: number; seeds: Set<string> }>();
@@ -60,16 +94,21 @@ export async function runDiscovery(kind: "manual" | "scheduled", seedsPerRun = 3
       byArtist.set(t.artist.id, a);
     }));
     // 3. Fetch artist profiles (cap per run) and keep emerging ones.
-    const ids = [...byArtist.keys()].slice(0, 60);
+    const ids = [...byArtist.keys()].slice(0, cfg.maxCandidates);
     stats.candidates = ids.length;
-    const profiles = (await pool(ids, (id) => dz<DzArtist>(`/artist/${id}`))).filter((p): p is DzArtist => !!p && isEmerging(p.nb_fan));
+    const profiles = (await pool(ids, (id) => dz<DzArtist>(`/artist/${id}`))).filter((p): p is DzArtist => {
+      if (!p) return false;
+      const why = establishedReason({ name: p.name, nb_fan: p.nb_fan, nb_album: p.nb_album, top_rank: byArtist.get(p.id)?.rank ?? 0 }, cfg);
+      if (why) stats.established++;
+      return !why;
+    });
     stats.emerging = profiles.length;
     const { data: existing } = await db.from("live_artists").select("id,deezer_id,mb_checked,country,seed_sources,playlist_hits").in("deezer_id", profiles.map((p) => p.id));
     const ex = new Map((existing ?? []).map((e) => [Number(e.deezer_id), e]));
     // 4. Release activity for each emerging artist.
     const albums = await pool(profiles, (p) => dz<{ data: { release_date: string }[] }>(`/artist/${p.id}/albums?limit=50`));
     // 5. Country check via MusicBrainz for a few new artists (1 request/second limit).
-    let mbBudget = 6;
+    let mbBudget = cfg.sources.musicbrainz ? 6 : 0;
     for (let k = 0; k < profiles.length; k++) {
       const p = profiles[k]!, seen = byArtist.get(p.id)!, prev = ex.get(p.id);
       const dates = (albums[k]?.data ?? []).map((a) => a.release_date).filter(Boolean).sort();
@@ -87,11 +126,15 @@ export async function runDiscovery(kind: "manual" | "scheduled", seedsPerRun = 3
         await sleep(1100);
       }
       if (country && !AFRICAN_ISO.has(country)) { stats.outsideAfrica++; continue; }
+      let wikiFamous = false;
+      if (cfg.sources.wikipedia) wikiFamous = await onWikipedia(p.name).catch(() => false);
+      if (cfg.excludeWikipedia && wikiFamous) { stats.established++; continue; }
       const row = {
         deezer_id: p.id, name: p.name, picture: p.picture_medium, link: p.link, nb_fan: p.nb_fan, nb_album: p.nb_album,
         country, region_source: regionSource, mb_checked: mbChecked, ...(mbid ? { mbid } : {}),
         seed_sources: [...new Set([...(prev?.seed_sources ?? []), ...seen.seeds])],
         playlist_hits: Math.max(prev?.playlist_hits ?? 0, seen.hits), top_rank: seen.rank,
+        wiki_checked: cfg.sources.wikipedia, wiki_famous: wikiFamous, excluded_reason: null,
         latest_release: latest, releases_12m: dates.filter((d) => d >= yearAgo).length, last_scanned: new Date().toISOString(),
       };
       const { data: up } = await db.from("live_artists").upsert(row, { onConflict: "deezer_id" }).select("id").single();
@@ -111,6 +154,7 @@ export async function runDiscovery(kind: "manual" | "scheduled", seedsPerRun = 3
 /** Recompute the breakout index for every artist from stored snapshots. */
 export async function rescoreAll() {
   const db = supabaseAdmin;
+  const cfg = await loadSettings();
   const { data: artists } = await db.from("live_artists").select("id,nb_fan,top_rank,playlist_hits,latest_release,releases_12m");
   const { data: snaps } = await db.from("live_snapshots").select("artist_id,captured_at,nb_fan").order("captured_at");
   const byA = new Map<string, { captured_at: string; nb_fan: number }[]>();
@@ -119,7 +163,7 @@ export async function rescoreAll() {
     const growth = fanGrowth30d(byA.get(a.id) ?? []);
     const days = a.latest_release ? Math.max(0, (Date.now() - Date.parse(a.latest_release)) / 864e5) : null;
     const f = { fans: a.nb_fan, topRank: a.top_rank, playlistHits: a.playlist_hits, daysSinceRelease: days, releases12m: a.releases_12m, growth30d: growth };
-    const { score, confidence } = discoveryIndex(f);
+    const { score, confidence } = discoveryIndex(f, cfg.discoveryWeights);
     await db.from("live_artists").update({ discovery_score: score, features: { ...f, confidence, snapshots: (byA.get(a.id) ?? []).length } }).eq("id", a.id);
   });
 }
@@ -145,6 +189,7 @@ Reply with ONLY a JSON object with keys: key, mode, tempo_bpm, genre, language, 
 /** Listen to one artist's top track and store this week's analysis. */
 export async function analyseArtist(artistId: string) {
   const db = supabaseAdmin;
+  const cfg = await loadSettings();
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) throw new Error("AI is not configured");
   const { data: a } = await db.from("live_artists").select("id,name,deezer_id").eq("id", artistId).single();
@@ -158,20 +203,20 @@ export async function analyseArtist(artistId: string) {
   ]);
   const provider = createLovableAiGatewayProvider(apiKey, undefined, { baseURL: "https://ai.gateway.lovable.dev/v1" });
   const result = streamText({
-    model: provider(AUDIO_MODEL),
+    model: provider(cfg.aiModel),
     maxRetries: 0,
     messages: [{ role: "user", content: [
-      { type: "text", text: PROMPT.replace("{artist}", a.name).replace("{title}", t.title) },
+      { type: "text", text: PROMPT.replace("{artist}", a.name).replace("{title}", t.title) + (cfg.listenerNotes ? `\nTeam guidance: ${cfg.listenerNotes}` : "") },
       { type: "file", data: new Uint8Array(audio), mediaType: "audio/mpeg" },
     ] }],
   });
   const text = await result.text;
   const json = text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1);
   const parsed = Analysis.parse(JSON.parse(json));
-  const overall = artisticOverall(parsed.scores);
+  const overall = artisticOverall(parsed.scores, cfg.artisticWeights);
   const row = {
     artist_id: a.id, week_start: weekStart(), track_id: t.id, track_title: t.title, track_link: t.link,
-    deezer_bpm: detail.bpm || null, result: parsed, overall, model: AUDIO_MODEL,
+    deezer_bpm: detail.bpm || null, result: parsed, overall, model: cfg.aiModel,
   };
   const { error } = await db.from("live_analyses").upsert(row, { onConflict: "artist_id,week_start" });
   if (error) throw new Error(error.message);
@@ -179,12 +224,13 @@ export async function analyseArtist(artistId: string) {
 }
 
 /** Weekly review: analyse the top-N discovery artists not yet reviewed this week. */
-export async function runWeeklyAnalysis(limit = 4) {
+export async function runWeeklyAnalysis(limit?: number) {
   const db = supabaseAdmin;
+  limit ??= (await loadSettings()).analysisBatch;
   const wk = weekStart();
   const { data: done } = await db.from("live_analyses").select("artist_id").eq("week_start", wk);
   const skip = new Set((done ?? []).map((d) => d.artist_id));
-  const { data: top } = await db.from("live_artists").select("id").order("discovery_score", { ascending: false, nullsFirst: false }).limit(40);
+  const { data: top } = await db.from("live_artists").select("id").is("excluded_reason", null).order("discovery_score", { ascending: false, nullsFirst: false }).limit(40);
   const todo = (top ?? []).filter((t) => !skip.has(t.id)).slice(0, limit);
   const results: { id: string; ok: boolean; error?: string }[] = [];
   for (const t of todo) {
