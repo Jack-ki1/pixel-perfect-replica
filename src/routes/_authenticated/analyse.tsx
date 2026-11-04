@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import { Headphones, Music2, Mic2, PenLine } from "lucide-react";
+import { Headphones, Music2, Mic2, PenLine, Sparkles, Star, Gauge, Languages } from "lucide-react";
+import { BarPlot, DonutPlot, RadarPlot, ScatterPlot, histogram, countBy } from "@/components/charts";
 import { liveArtistsQuery, analysesQuery, latestByArtist, type AnalysisJson } from "@/lib/live";
 import { analyseNow } from "@/lib/radar.functions";
 import { ARTISTIC_KEYS, weekStart } from "@/lib/scoring";
@@ -37,6 +38,11 @@ function Analyse() {
     onSuccess: (r) => { r.failed ? toast.warning(`Reviewed ${r.analysed}, ${r.failed} could not be reviewed`) : toast.success(`Reviewed ${r.analysed} artists`); qc.invalidateQueries({ queryKey: ["live_analyses"] }); },
     onError: (e: Error) => toast.error(e.message),
   });
+  const js = rows.map((r) => r.result as AnalysisJson);
+  const overalls = rows.map((r) => Number(r.overall));
+  const avgOverall = overalls.length ? Math.round(overalls.reduce((a, b) => a + b, 0) / overalls.length) : "—";
+  const avgNum = (k: string) => js.length ? js.reduce((s, j) => s + (j.scores?.[k as "vocals"] ?? 0), 0) / js.length : 0;
+  const weeks = countBy(analyses, (a) => a.week_start, 12).sort((a, b) => a.name.localeCompare(b.name));
   const avg = (k: string) => rows.length ? Math.round(rows.reduce((s, r) => s + ((r.result as AnalysisJson).scores?.[k as "vocals"] ?? 0), 0) / rows.length * 10) / 10 : "—";
 
   return (
@@ -48,7 +54,7 @@ function Analyse() {
           <p className="mt-2 text-sm text-muted-foreground">Every Monday the AI listens to the top-ranked artists' leading track and judges songwriting, key and harmony, vocals, melody, production, originality and commercial pull. Songwriting and vocals count double. AI judgements are a first listen — your team has the final word.</p>
         </div>
         <div className="text-right text-xs text-muted-foreground">
-          <Button onClick={() => run.mutate()} disabled={run.isPending || !artists.length}>{run.isPending ? "Listening… (about a minute)" : "Review next 3 artists"}</Button>
+          <Button onClick={() => run.mutate()} disabled={run.isPending || !artists.length}>{run.isPending ? "Listening… (about a minute)" : "Review next batch"}</Button>
           <div className="mt-2">Week of {wk} · {thisWeek.length} reviewed so far</div>
         </div>
       </section>
@@ -58,9 +64,23 @@ function Analyse() {
         <Kpi icon={<PenLine className="size-4" />} value={avg("songwriting")} label="Avg songwriting /10" />
         <Kpi icon={<Mic2 className="size-4" />} value={avg("vocals")} label="Avg vocals /10" tone="cyan" />
         <Kpi icon={<Headphones className="size-4" />} value={thisWeek.length} label="Reviewed this week" tone="amber" />
+        <Kpi icon={<Gauge className="size-4" />} value={avgOverall} label="Avg artistic score /100" tone="violet" />
+        <Kpi icon={<Star className="size-4" />} value={overalls.filter((o) => o >= 75).length} label="Standout (75+)" />
+        <Kpi icon={<Sparkles className="size-4" />} value={avg("originality")} label="Avg originality /10" tone="cyan" />
+        <Kpi icon={<Languages className="size-4" />} value={new Set(js.map((j) => j.language)).size} label="Languages heard" tone="amber" />
       </div>
 
-      {rows.length === 0 ? <Empty>No reviews yet. Run Discovery first, then press <b>Review next 3 artists</b>.</Empty> : (
+      <div className="grid gap-4 lg:grid-cols-3">
+        <RadarPlot title="Average craft profile" sub="Mean AI score per dimension (0–10)" data={ARTISTIC_KEYS.map((k) => ({ name: LABEL[k]!, value: Math.round(avgNum(k) * 10) / 10 }))} />
+        <BarPlot title="Artistic score distribution" color={2} data={histogram(overalls, [0, 40, 50, 60, 70, 80, 101], (lo, hi) => `${lo}-${hi === 101 ? 100 : hi}`)} />
+        <DonutPlot title="Genres heard" data={countBy(js, (j) => j.genre, 6)} />
+        <ScatterPlot title="Songwriting vs vocals" sub="The two dimensions that count double" x="Songwriting" y="Vocals" data={rows.map((r, i) => ({ name: byId.get(r.artist_id)!.name, x: js[i]!.scores.songwriting, y: js[i]!.scores.vocals }))} />
+        <BarPlot title="Musical keys" color={1} horizontal data={countBy(js, (j) => j.key, 8)} />
+        <BarPlot title="Tempo (BPM)" color={3} data={histogram(rows.map((r, i) => Number(js[i]!.tempo_bpm ?? r.deezer_bpm ?? 0)).filter(Boolean), [0, 80, 95, 105, 115, 125, 140, 300], (lo, hi) => hi === 300 ? `${lo}+` : `${lo}-${hi}`)} />
+      </div>
+      <BarPlot title="Reviews per week" data={weeks} />
+
+      {rows.length === 0 ? <Empty>No reviews yet. Run Discovery first, then press <b>Review next batch</b>.</Empty> : (
         <div className="grid gap-4 xl:grid-cols-2">
           {rows.map((r) => { const a = byId.get(r.artist_id)!; const j = r.result as AnalysisJson; return (
             <Panel key={r.id}>
