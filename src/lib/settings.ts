@@ -70,6 +70,7 @@ export function mergeSettings(raw: unknown): Settings {
 /** Why an artist counts as already established (null = still emerging). */
 export function establishedReason(a: { name: string; nb_fan: number; nb_album: number; top_rank: number | null; wiki_famous?: boolean }, s: Settings): string | null {
   if (s.excludeNames.some((n) => n.trim().toLowerCase() === a.name.toLowerCase())) return "On exclusion list";
+  if (/\b(hits|various artists|playlist|compilation|records|music)\s*$/i.test(a.name)) return "Compilation or label, not an artist";
   if (a.nb_fan > s.maxFans) return `Over ${s.maxFans} fans`;
   if (a.nb_fan < s.minFans) return `Under ${s.minFans} fans`;
   if (a.nb_album > s.maxCatalog) return `Large catalogue (${a.nb_album} releases)`;
