@@ -56,7 +56,7 @@ function Discovery() {
   const growths = artists.map((a) => feat(a).growth30d).filter((g): g is number => g != null);
   const medGrowth = growths.length ? [...growths].sort((a, b) => a - b)[Math.floor(growths.length / 2)]! : null;
   const recent = artists.filter((a) => a.latest_release && Date.now() - Date.parse(a.latest_release) < 90 * 864e5).length;
-  const scanRuns = runs.filter((r) => r.kind.startsWith("discovery")).slice().reverse().map((r) => { const st = (r.stats ?? {}) as Record<string, number>; return { name: r.started_at.slice(5, 10), Emerging: st.emerging ?? 0, New: st.new ?? 0, Filtered: st.established ?? 0 }; });
+  const scanRuns = runs.filter((r) => r.kind.startsWith("discovery")).slice().reverse().map((r) => { const st = (r.stats ?? {}) as Record<string, number>; return { name: r.started_at.slice(5, 10), Emerging: st["emerging"] ?? 0, New: st["new"] ?? 0, Filtered: st["established"] ?? 0 }; });
 
   return (
     <div className="space-y-6">

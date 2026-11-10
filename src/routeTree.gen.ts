@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAnalyseRouteImport } from './routes/_authenticated/analyse'
 import { Route as AuthenticatedDiscoveryRouteImport } from './routes/_authenticated/discovery'
 import { Route as AuthenticatedRecommendationsRouteImport } from './routes/_authenticated/recommendations'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedArtistIdRouteImport } from './routes/_authenticated/artist.$id'
 import { Route as ApiPublicJobsAnalysisRouteImport } from './routes/api/public/jobs/analysis'
 import { Route as ApiPublicJobsDiscoveryRouteImport } from './routes/api/public/jobs/discovery'
@@ -49,6 +50,11 @@ const AuthenticatedRecommendationsRoute =
     path: '/recommendations',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedArtistIdRoute = AuthenticatedArtistIdRouteImport.update({
   id: '/artist/$id',
   path: '/artist/$id',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/analyse': typeof AuthenticatedAnalyseRoute
   '/discovery': typeof AuthenticatedDiscoveryRoute
   '/recommendations': typeof AuthenticatedRecommendationsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/artist/$id': typeof AuthenticatedArtistIdRoute
   '/api/public/jobs/analysis': typeof ApiPublicJobsAnalysisRoute
   '/api/public/jobs/discovery': typeof ApiPublicJobsDiscoveryRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/analyse': typeof AuthenticatedAnalyseRoute
   '/discovery': typeof AuthenticatedDiscoveryRoute
   '/recommendations': typeof AuthenticatedRecommendationsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/artist/$id': typeof AuthenticatedArtistIdRoute
   '/api/public/jobs/analysis': typeof ApiPublicJobsAnalysisRoute
   '/api/public/jobs/discovery': typeof ApiPublicJobsDiscoveryRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/_authenticated/analyse': typeof AuthenticatedAnalyseRoute
   '/_authenticated/discovery': typeof AuthenticatedDiscoveryRoute
   '/_authenticated/recommendations': typeof AuthenticatedRecommendationsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/artist/$id': typeof AuthenticatedArtistIdRoute
   '/api/public/jobs/analysis': typeof ApiPublicJobsAnalysisRoute
   '/api/public/jobs/discovery': typeof ApiPublicJobsDiscoveryRoute
@@ -105,6 +114,7 @@ export interface FileRouteTypes {
     | '/analyse'
     | '/discovery'
     | '/recommendations'
+    | '/settings'
     | '/artist/$id'
     | '/api/public/jobs/analysis'
     | '/api/public/jobs/discovery'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
     | '/analyse'
     | '/discovery'
     | '/recommendations'
+    | '/settings'
     | '/artist/$id'
     | '/api/public/jobs/analysis'
     | '/api/public/jobs/discovery'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '/_authenticated/analyse'
     | '/_authenticated/discovery'
     | '/_authenticated/recommendations'
+    | '/_authenticated/settings'
     | '/_authenticated/artist/$id'
     | '/api/public/jobs/analysis'
     | '/api/public/jobs/discovery'
@@ -183,6 +195,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRecommendationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/artist/$id': {
       id: '/_authenticated/artist/$id'
       path: '/artist/$id'
@@ -211,6 +230,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAnalyseRoute: typeof AuthenticatedAnalyseRoute
   AuthenticatedDiscoveryRoute: typeof AuthenticatedDiscoveryRoute
   AuthenticatedRecommendationsRoute: typeof AuthenticatedRecommendationsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedArtistIdRoute: typeof AuthenticatedArtistIdRoute
 }
 
@@ -218,6 +238,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAnalyseRoute: AuthenticatedAnalyseRoute,
   AuthenticatedDiscoveryRoute: AuthenticatedDiscoveryRoute,
   AuthenticatedRecommendationsRoute: AuthenticatedRecommendationsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedArtistIdRoute: AuthenticatedArtistIdRoute,
 }
 

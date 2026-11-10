@@ -10,7 +10,7 @@ export const C = ["var(--lime)", "var(--cyan)", "var(--violet)", "var(--amber)",
 const axis = { stroke: "var(--muted-foreground)", fontSize: 11, tickLine: false, axisLine: false } as const;
 const tip = { contentStyle: { background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12, color: "var(--popover-foreground)" }, cursor: { fill: "var(--accent)", opacity: 0.4 } };
 
-function Frame({ title, sub, children, empty, h = 220 }: { title: string; sub?: string; children: ReactNode; empty?: boolean; h?: number }) {
+function Frame({ title, sub, children, empty, h = 220 }: { title: string; sub?: string | undefined; children: ReactNode; empty?: boolean; h?: number }) {
   return (
     <Panel title={title} sub={sub}>
       <div style={{ height: h }}>
@@ -23,7 +23,7 @@ function Frame({ title, sub, children, empty, h = 220 }: { title: string; sub?: 
 
 export type Datum = { name: string; value: number };
 
-export function BarPlot({ title, sub, data, color = 0, horizontal }: { title: string; sub?: string; data: Datum[]; color?: number; horizontal?: boolean }) {
+export function BarPlot({ title, sub, data, color = 0, horizontal }: { title: string; sub?: string | undefined; data: Datum[]; color?: number; horizontal?: boolean }) {
   return (
     <Frame title={title} sub={sub} empty={!data.length}>
       <BarChart data={data} layout={horizontal ? "vertical" : "horizontal"} margin={{ left: horizontal ? 10 : -20, right: 8, top: 4 }}>
@@ -37,7 +37,7 @@ export function BarPlot({ title, sub, data, color = 0, horizontal }: { title: st
   );
 }
 
-export function DonutPlot({ title, sub, data }: { title: string; sub?: string; data: Datum[] }) {
+export function DonutPlot({ title, sub, data }: { title: string; sub?: string | undefined; data: Datum[] }) {
   return (
     <Frame title={title} sub={sub} empty={!data.some((d) => d.value)}>
       <PieChart>
@@ -51,7 +51,7 @@ export function DonutPlot({ title, sub, data }: { title: string; sub?: string; d
   );
 }
 
-export function ScatterPlot({ title, sub, data, x, y }: { title: string; sub?: string; data: { name: string; x: number; y: number }[]; x: string; y: string }) {
+export function ScatterPlot({ title, sub, data, x, y }: { title: string; sub?: string | undefined; data: { name: string; x: number; y: number }[]; x: string; y: string }) {
   return (
     <Frame title={title} sub={sub} empty={!data.length}>
       <ScatterChart margin={{ left: -10, right: 10, top: 6 }}>
@@ -67,7 +67,7 @@ export function ScatterPlot({ title, sub, data, x, y }: { title: string; sub?: s
   );
 }
 
-export function RadarPlot({ title, sub, data }: { title: string; sub?: string; data: Datum[] }) {
+export function RadarPlot({ title, sub, data }: { title: string; sub?: string | undefined; data: Datum[] }) {
   return (
     <Frame title={title} sub={sub} empty={!data.some((d) => d.value)} h={240}>
       <RadarChart data={data} outerRadius="75%">
@@ -81,7 +81,7 @@ export function RadarPlot({ title, sub, data }: { title: string; sub?: string; d
   );
 }
 
-export function AreaPlot({ title, sub, data, keys }: { title: string; sub?: string; data: Record<string, number | string>[]; keys: string[] }) {
+export function AreaPlot({ title, sub, data, keys }: { title: string; sub?: string | undefined; data: Record<string, number | string>[]; keys: string[] }) {
   return (
     <Frame title={title} sub={sub} empty={!data.length}>
       <AreaChart data={data} margin={{ left: -20, right: 8, top: 4 }}>
